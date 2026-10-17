@@ -1,3 +1,4 @@
+import {validateEnvironment,atmosphereSchema,triggerSchema} from './environment.js';
 // Pure scene data and coordinate math shared by renderer, server validation and tests.
 export const POSES=['neutral','wave','point','sit'];
 export const PRIMITIVES=['box','sphere','cylinder'];
@@ -45,19 +46,20 @@ function str(x,max=100){if(typeof x!=='string'||x.length<1||x.length>max)fail('I
 function ident(x){str(x,64);if(!/^[a-zA-Z0-9_-]+$/.test(x)||['__proto__','constructor','prototype'].includes(x))fail('Invalid entity ID');}
 function vec(x,min,max){if(!Array.isArray(x)||x.length!==3||x.some(v=>!Number.isFinite(v)||v<min||v>max))fail('Invalid scene vector');}
 function color(x){if(typeof x!=='string'||!/^#[0-9a-fA-F]{6}$/.test(x))fail('Expected hex color');}
-export function validateObject(o){fields(o,['id','name','primitive','position','rotation','size','color','interaction','active']);ident(o.id);str(o.name);if(!PRIMITIVES.includes(o.primitive)||!INTERACTIONS.includes(o.interaction)||typeof o.active!=='boolean')fail('Invalid object primitive or interaction');vec(o.position,-1e6,1e6);vec(o.rotation,-Math.PI*2,Math.PI*2);vec(o.size,.03,10);color(o.color);return o;}
+export function validateObject(o){fields(o,['id','name','primitive','position','rotation','size','color','interaction','active','visible'],['id','name','primitive','position','rotation','size','color','interaction','active']);ident(o.id);str(o.name);if(o.visible!==undefined&&typeof o.visible!=='boolean')fail('Invalid visibility');if(!PRIMITIVES.includes(o.primitive)||!INTERACTIONS.includes(o.interaction)||typeof o.active!=='boolean')fail('Invalid object primitive or interaction');vec(o.position,-1e6,1e6);vec(o.rotation,-Math.PI*2,Math.PI*2);vec(o.size,.03,10);color(o.color);return o;}
 export function validatePart(p){fields(p,['id','parent','position','rotation','geometry','color']);ident(p.id);if(p.parent!==null)ident(p.parent);vec(p.position,-8,8);vec(p.rotation,-Math.PI*2,Math.PI*2);fields(p.geometry,['type','size','offset']);if(!PRIMITIVES.includes(p.geometry.type))fail('Invalid part primitive');vec(p.geometry.size,.03,6);vec(p.geometry.offset,-6,6);color(p.color);return p;}
 export function validateScene(s){
- fields(s,['format','avatar','parts','objects']);if(s.format!==1)fail('Unsupported scene format');fields(s.avatar,['id','name','position','yaw','pose']);ident(s.avatar.id);str(s.avatar.name);vec(s.avatar.position,-1e6,1e6);if(s.avatar.position[1]!==0)fail('Initial scene uses ground-plane navigation');if(!Number.isFinite(s.avatar.yaw)||Math.abs(s.avatar.yaw)>Math.PI*2||!POSES.includes(s.avatar.pose))fail('Invalid avatar orientation or pose');
+ fields(s,['format','avatar','parts','objects','atmosphere','triggers'],['format','avatar','parts','objects']);if(s.format!==1)fail('Unsupported scene format');fields(s.avatar,['id','name','position','yaw','pose']);ident(s.avatar.id);str(s.avatar.name);vec(s.avatar.position,-1e6,1e6);if(s.avatar.position[1]!==0)fail('Initial scene uses ground-plane navigation');if(!Number.isFinite(s.avatar.yaw)||Math.abs(s.avatar.yaw)>Math.PI*2||!POSES.includes(s.avatar.pose))fail('Invalid avatar orientation or pose');
  if(!Array.isArray(s.parts)||s.parts.length<1||s.parts.length>40||!Array.isArray(s.objects)||s.objects.length>60)fail('Scene component limit exceeded');
  const byId=new Map();for(const p of s.parts){validatePart(p);if(byId.has(p.id))fail('Duplicate body part');byId.set(p.id,p);}
  for(const p of s.parts){const seen=new Set([p.id]);let parent=p.parent;while(parent!==null){if(!byId.has(parent)||seen.has(parent))fail('Unknown parent or body hierarchy cycle');seen.add(parent);parent=byId.get(parent).parent;}}
- const ids=new Set([s.avatar.id]);for(const o of s.objects){validateObject(o);if(ids.has(o.id))fail('Duplicate entity');ids.add(o.id);}return s;
+ const ids=new Set([s.avatar.id]);for(const o of s.objects){validateObject(o);if(ids.has(o.id))fail('Duplicate entity');ids.add(o.id);}validateEnvironment(s);return s;
 }
 // Schema is declarative data only. Rendering and behavior remain platform-defined.
 const obj=(properties,required=Object.keys(properties))=>({type:'object',additionalProperties:false,properties,required});
 const vector=(min,max)=>({type:'array',minItems:3,maxItems:3,items:{type:'number',minimum:min,maximum:max}});
 const identity={type:'string',minLength:1,maxLength:64,pattern:'^[a-zA-Z0-9_-]+$'},colorSchema={type:'string',pattern:'^#[0-9a-fA-F]{6}$'};
-export const objectSchema=obj({id:identity,name:{type:'string',minLength:1,maxLength:100},primitive:{enum:PRIMITIVES},position:vector(-1e6,1e6),rotation:vector(-Math.PI*2,Math.PI*2),size:vector(.03,10),color:colorSchema,interaction:{enum:INTERACTIONS},active:{type:'boolean'}});
+export const objectSchema=obj({id:identity,name:{type:'string',minLength:1,maxLength:100},primitive:{enum:PRIMITIVES},position:vector(-1e6,1e6),rotation:vector(-Math.PI*2,Math.PI*2),size:vector(.03,10),color:colorSchema,interaction:{enum:INTERACTIONS},active:{type:'boolean'},visible:{type:'boolean'}},['id','name','primitive','position','rotation','size','color','interaction','active']);
 export const partSchema=obj({id:identity,parent:{type:['string','null'],maxLength:64},position:vector(-8,8),rotation:vector(-Math.PI*2,Math.PI*2),geometry:obj({type:{enum:PRIMITIVES},size:vector(.03,6),offset:vector(-6,6)}),color:colorSchema});
-export const sceneSchema=obj({format:{const:1},avatar:obj({id:identity,name:{type:'string',minLength:1,maxLength:100},position:vector(-1e6,1e6),yaw:{type:'number',minimum:-Math.PI*2,maximum:Math.PI*2},pose:{enum:POSES}}),parts:{type:'array',minItems:1,maxItems:40,items:partSchema},objects:{type:'array',maxItems:60,items:objectSchema}});
+export const sceneSchema=obj({format:{const:1},avatar:obj({id:identity,name:{type:'string',minLength:1,maxLength:100},position:vector(-1e6,1e6),yaw:{type:'number',minimum:-Math.PI*2,maximum:Math.PI*2},pose:{enum:POSES}}),parts:{type:'array',minItems:1,maxItems:40,items:partSchema},objects:{type:'array',maxItems:60,items:objectSchema},atmosphere:atmosphereSchema,triggers:{type:'array',maxItems:8,items:triggerSchema}},['format','avatar','parts','objects']);
+

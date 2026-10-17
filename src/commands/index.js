@@ -1,3 +1,4 @@
+import {createMannequinRoom} from '../../public/scene/prefabs.js';
 import {createScene} from '../../public/scene/model.js';
 import {sceneAction,guardSceneEdit} from '../scenes/actions.js';
 import {Fault,check,fields,text,id,digest,canonical,jsonSize,finite} from './util.js';
@@ -19,7 +20,7 @@ export function applyCommand(original,p,c,fp,now=Date.now()){
  const s=structuredClone(original),a=c.payload;let outcome={},audience='room';
  if(c.op.startsWith('widget.')||c.op==='scene.create'){check(Number.isInteger(c.expectedVersion)&&c.expectedVersion===s.version,'conflict','Workspace changed; refresh and retry');}
  switch(c.op){
- case 'scene.create':{fields(a,['id','title','layout'],['id','title']);text(a.id,160);check(a.id&&!s.widgets[a.id],'collision','Widget ID already exists');check(Object.keys(s.widgets).length<100,'limit','Maximum 100 widgets');outcome=s.widgets[a.id]={id:a.id,kind:'scene3d',title:text(a.title,100),layout:layout(a.layout||{x:45,y:45,width:760,height:610,collapsed:false}),spec:createScene(),version:0,createdBy:p.id};break;}
+ case 'scene.create':{fields(a,['id','title','layout','template'],['id','title']);check(a.template===undefined||['open','room'].includes(a.template),'invalid','Unknown scene template');text(a.id,160);check(a.id&&!s.widgets[a.id],'collision','Widget ID already exists');check(Object.keys(s.widgets).length<100,'limit','Maximum 100 widgets');outcome=s.widgets[a.id]={id:a.id,kind:'scene3d',title:text(a.title,100),layout:layout(a.layout||{x:45,y:45,width:760,height:610,collapsed:false}),spec:a.template==='room'?createMannequinRoom():createScene(),version:0,createdBy:p.id};break;}
  case 'scene.act':outcome=sceneAction(s,p,a,now);break;
  case 'widget.create':{fields(a,['id','kind','title','layout','spec'],['id','kind','title','layout','spec']);text(a.id,160);check(a.id&&!s.widgets[a.id],'collision','Widget ID already exists');check(Object.keys(s.widgets).length<100,'limit','Maximum 100 widgets');layout(a.layout);spec(a.kind,a.spec);text(a.title,100);outcome=s.widgets[a.id]={...a,version:0,createdBy:p.id};break;}
  case 'widget.update':case 'widget.delete':{fields(a,c.op==='widget.update'?['id','title','layout','spec','expectedWidgetVersion']:['id','expectedWidgetVersion'],['id','expectedWidgetVersion']);const w=s.widgets[a.id];check(w,'not_found','Widget not found');if(w.kind==='scene3d'&&(c.op==='widget.delete'||a.spec!==undefined))guardSceneEdit(w,p,now,s);check(a.expectedWidgetVersion===w.version,'conflict','Widget changed');if(c.op==='widget.delete'){delete s.widgets[a.id];outcome={id:a.id};}else{check(Object.keys(a).length>2,'invalid','No widget changes');if(a.layout!==undefined)w.layout=layout(a.layout);if(a.spec!==undefined){w.spec=spec(w.kind,a.spec);if(w.kind==='scene3d')w.sceneRuntime={version:(w.sceneRuntime?.version||0)+1,controller:null};}if(a.title!==undefined)w.title=text(a.title,100);w.version++;outcome=w;}break;}
@@ -50,4 +51,5 @@ export class Engine{
  async submit(p,c){let fp;try{jsonSize(c);fp=await fingerprint(p,c);}catch(e){return {type:'result',id:c?.id??null,status:'rejected',code:'invalid',reason:'Invalid command'};}const out=this.store.change(s=>{const x=applyCommand(s,p,c,fp);return {state:x.state,value:{result:x.result,duplicate:x.duplicate}};});if(out.result.status==='accepted'&&!out.duplicate){try{this.notify();}catch{/* Committed result stays accepted. */}}return out.result;}
  snapshot(p){return snapshot(this.read(),p);}
 }
+
 

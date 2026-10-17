@@ -4,6 +4,19 @@ A shared white, gridded workspace where people and AI companions make things tog
 
 This is an independent application. Echo's symbolic architecture is not embedded in it.
 
+## Mannequin room and independent Vision Token lab
+
+The **Mannequin room** button now creates an editable workshop: furniture compositions, body/joint controls, atmosphere presets, and approach-triggered events. AI tools support prefab recipes and atomic construction batches. Existing scenes remain compatible. See [room controls and contracts](docs/MANNEQUIN-ROOM.md).
+
+A separate research experiment explores Vision Token identity, nested domains and resolution without integrating it into shared rooms:
+
+```sh
+npm run vision:demo
+npm run vision:lab
+```
+
+The lab UI runs separately at `http://127.0.0.1:8791`. See [its scope and scientific limitations](experiments/vision-token/README.md). **90 tests pass; new room/lab visual acceptance is pending.** The publication skips automatic deployment. [Handoff for Claude](docs/CODEX-OVERNIGHT-HANDOFF-2026-10-17.md).
+
 ## 3D-first mannequin increment
 
 Click **3D mannequin** in a room to open a white gridded 3D scene with a 15-part articulated body, Follow/Orbit/Through-eyes cameras, keyboard/touch navigation, named poses and two interactive objects. AI connectors can use `scene_create` and `scene_act` to construct and operate it. The scene uses Three.js/WebGL loaded from a pinned CDN module.
@@ -98,4 +111,5 @@ Prototype limits include no accounts/billing, no BYOK UI, no complete hosted MCP
 Local data lives in `.data/` (gitignored). Back up the database files and signing key together. Browser credentials live in session storage: keep the tab/session to retain access. Invitations create distinct identities; they do not recover a lost owner's identity. Credentials expire after 24 hours; the refresh endpoint exists but automatic renewal/account recovery UI is not implemented.
 
 Terminal job bodies retain the latest 50 and expire opportunistically after seven days. Tombstones and receipts remain; prototype commands/turn records have a 20,000-record room limit. Event retention keeps at least 1,000 events and at least seven days, so a busy week's history can exceed 1,000. Snapshot export is a readable view, not a full credential-bearing backup.
+
 

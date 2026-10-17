@@ -10,7 +10,9 @@
     "start": "node src/local.js",
     "test": "node tools/test.js",
     "dev:cloudflare": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "vision:demo": "node experiments/vision-token/demo.js",
+    "vision:lab": "node experiments/vision-token/serve.js"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

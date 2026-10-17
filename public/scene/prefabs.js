@@ -1,0 +1,11 @@
+import {createScene} from './model.js';
+const o=(id,name,position,size,color='#988a72',primitive='box',interaction='none')=>({id,name,primitive,position,size,color,rotation:[0,0,0],interaction,active:false});
+export const BUILTINS={
+ room:{name:'Open-front mannequin room',objects:[o('floor','Floor',[0,-.06,0],[10,.08,8],'#ddd8c8'),o('north','Back wall',[0,1.4,-4],[10,2.8,.16],'#dddcca'),o('west','Left wall',[-5,1.4,0],[.16,2.8,8],'#e5e3d6'),o('east','Low side wall',[5,.55,0],[.16,1.1,8],'#e5e3d6'),o('frontL','Door side',[-3,.5,4],[4,1,.16],'#dddcca'),o('frontR','Door side',[3,.5,4],[4,1,.16],'#dddcca'),o('lintel','Door lintel',[0,2.55,4],[2,.3,.2],'#b0a58b')]},
+ desk:{name:'Desk',objects:[o('top','Desktop',[0,.95,0],[1.8,.12,.85]),...[-.75,.75].flatMap((x,i)=>[-.3,.3].map((z,j)=>o(`leg${i}${j}`,'Desk leg',[x,.44,z],[.09,.88,.09],'#726c60')))]},
+ chair:{name:'Chair',objects:[o('seat','Seat',[0,.5,0],[.6,.12,.6],'#708c75'),o('back','Backrest',[0,.9,.26],[.6,.7,.09],'#708c75'),...[-.23,.23].flatMap((x,i)=>[-.23,.23].map((z,j)=>o(`leg${i}${j}`,'Chair leg',[x,.22,z],[.07,.44,.07],'#5b705f')))]},
+ marker:{name:'Marking stone',objects:[o('stone','Marking stone',[0,.7,0],[.9,1.4,.45],'#8c9295')]},
+ arch:{name:'Doorway',objects:[o('left','Arch left',[-.9,1.2,0],[.25,2.4,.4],'#a8a28f'),o('right','Arch right',[.9,1.2,0],[.25,2.4,.4],'#a8a28f'),o('top','Arch lintel',[0,2.45,0],[2.1,.3,.45],'#a8a28f')]}
+};
+export function instantiate(definition,instanceId,position=[0,0,0],yaw=0){const c=Math.cos(yaw),s=Math.sin(yaw);return definition.objects.map(v=>({...structuredClone(v),id:`${instanceId}_${v.id}`,position:[position[0]+v.position[0]*c+v.position[2]*s,position[1]+v.position[1],position[2]-v.position[0]*s+v.position[2]*c],rotation:[v.rotation[0],(v.rotation[1]+yaw)%(Math.PI*2),v.rotation[2]]}));}
+export function createMannequinRoom(){const scene=createScene();scene.atmosphere={preset:'studio'};scene.objects.push(...instantiate(BUILTINS.room,'room'),...instantiate(BUILTINS.desk,'desk',[2,0,-1]),...instantiate(BUILTINS.chair,'chair',[2,0,.5]),...instantiate(BUILTINS.arch,'arch',[-2,0,-2]));scene.triggers=[{id:'welcome',center:[0,0,-1.4],radius:.7,once:true,actions:[{type:'narrate',text:'You have entered the mannequin workshop. Objects, light and behavior can be composed here.'}] }];return scene;}

@@ -1,0 +1,5 @@
+import {createToken,apply,resolution,seal,unseal,address} from './public/model.js';
+let token=createToken('vision-demo','Independent Vision Token experiment');let seq=0;
+const run=(op,payload={})=>{const out=apply(token,{id:'demo-'+(++seq),op,payload,expectedRevision:token.revision});token=out.token;return out.result;};
+run('open');run('elements.prepare');run('seed.hydrogen');const request=run('resolve',{domain:'el-H',levels:{visual:2,structural:2,computational:3}});const calculation=run('model.evaluate',{domain:'el-H',nMax:3});run('instance.create',{id:'cloud',seed:'hydrogen-rydberg-v1',count:'1'});for(let i=0;i<12;i++)run('instance.double',{id:'cloud'});run('close');const artifact=await seal(token),restored=await unseal(artifact);
+console.log(JSON.stringify({token:restored.id,shell:restored.shell,elements:118,aggregate:restored.instances.cloud.count,resolution:resolution(restored.domains['el-H']),energyLevels:calculation.levels,address:address(restored,'el-H'),checksum:artifact.sha256,note:'Energy levels use a declared approximation. The aggregate is not a cloud simulation; unsupported resolution remains unmet.'},null,2));

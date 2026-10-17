@@ -5,3 +5,6 @@ await import('../test/room.test.js');
 await import('../test/connector.test.js');
 
 await import('../test/scene.test.js');
+
+await import('../test/environment.test.js');
+await import('../experiments/vision-token/test/model.test.js');

@@ -27,3 +27,9 @@ The Node server, UI and Cloudflare configuration are supplied as a runnable prot
 ## 3D increment — 17 October 2026
 
 The expanded suite passes **64 tests**: the 46-test connector baseline plus 18 new scene scenarios. See `docs/SCENE3D.md` for the split between pure geometry/model tests, request-handler/connector verification and unverified WebGL rendering. New browser modules and the application pass syntax checks. Chromium launch and CDN download remain blocked in this sandbox. No deployment or paid model call was performed for this increment.
+
+
+
+## Mannequin room and separate Vision Token experiment — 17 October 2026
+
+`npm test`: **90 tests passed** (64 baseline, 13 room/environment, 13 Vision Token). `npm run vision:demo` also completed its close/export/import demonstration. Browser source syntax checks passed. No new browser, CDN, GPU, live connector or Cloudflare validation is claimed for this increment. See `docs/MANNEQUIN-ROOM.md` and the experiment README. The lab is not integrated into room authority.
