@@ -9,3 +9,4 @@ await import('../test/scene.test.js');
 await import('../test/environment.test.js');
 await import('../experiments/vision-token/test/model.test.js');
 await import('../test/conversation.test.js');
+await import('../test/mobile-ui.test.js');

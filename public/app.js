@@ -1,8 +1,10 @@
+import {installMobileUI} from '/mobile-ui.js';
 import {ConversationSend} from '/conversation.js';
 import {createMannequinRoom} from '/scene/prefabs.js';
 import {createScene} from '/scene/model.js';
 const $=id=>document.getElementById(id),el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=String(txt);return n;};
 let credential=null,state=null,principal=null,settings=null,socket=null,streamAbort=null,generation=0,refreshTimer=null,thread='main',busy=false;
+installMobileUI(window,document);
 const icons={note:'▤',avatar:'א',quiz:'✦',python:'⌘',table:'▦',chart:'▥',drawing:'∿',shape:'◇',scene3d:'⬡'};
 const defaults={note:{text:'Something worth keeping.'},avatar:{glyph:'ג',name:'Little Gimel',mood:'Curious about what we will make.'},quiz:{question:'Which action connects two pieces?',options:['Join','Separate','Forget'],answerIndex:0},python:{code:'print("Hello from our canvas")\nresult = sum(i * i for i in range(10))\nprint(result)'},table:{columns:['Idea','Next step'],rows:[['A shared game','Make one small rule'],['An avatar','Give it a personality']]},chart:{labels:['Wonder','Play','Practice'],values:[8,6,9]},shape:{shape:'circle',color:'#bfd191',text:''},drawing:{strokes:[{color:'#6f8b4c',points:[[20,90],[60,20],[110,85],[160,15],[205,90]]}]}};
 defaults.scene3d=createMannequinRoom();
