@@ -1,0 +1,18 @@
+name = "group-canvas"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+[vars]
+DAILY_TURNS = "30"
+DAILY_TOKENS = "100000"
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+# Set ROOM_SIGNING_KEY (32+ random characters) and optional provider secrets
+# OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY through Wrangler secrets.
