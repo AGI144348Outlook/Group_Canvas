@@ -54,9 +54,82 @@ production Worker.
 - Direction noted: construction freedom and an operable body are the feature; the widget
   catalog is a starting point.
 
-## 5. Next topic: room creation (discussion in progress with Timothy)
+## 5. Room creation — options presented, no decision yet
 
-Today creation is operator-only (`CREATE_ROOM_KEY`). Timothy is choosing between operator
-only, invite-to-create codes, open creation with limits, and account-based plans, plus
-what a new room contains (templates, privacy, companions). Decisions will be recorded here
-before anyone implements them.
+Today creation is operator-only (`CREATE_ROOM_KEY`). Options put to Timothy:
+
+| Option | Mechanism |
+|---|---|
+| A. Operator only (current) | Holders of the operator code |
+| B. Invite-to-create codes | Owner-issued, limited (e.g. 3 rooms), revocable codes |
+| C. Open with limits | Anyone; rate limits, idle-room expiry, paid AI off |
+| D. Accounts + plans | Sign-in; plan-based room/AI/storage quotas (provider undecided) |
+
+Suggested path B → C → D. Creation-time contents also discussed: starting template (blank,
+game room, 3D world, study desk, comic studio), privacy (invite-only / link-view / public),
+companions, and automatic recovery key + "My rooms". **Timothy has not chosen;** he redirected
+to the primary goal below. Nothing here is to be implemented yet.
+
+## 6. Primary goal, in Timothy's words: text to visuals
+
+> "Texting to visuals is what I'm aiming at. Like, if I ask you to put a ת marking stone off
+> in the distance of the Gridded field, or imagine the level of creativity needed in keeping
+> up with Dungeon Masters"
+
+Natural language in → a navigable, persistent world out, at the improvisational pace of a
+Dungeon Master. This aligns with your construction-freedom direction and the LVT
+avatar-as-origin framing.
+
+### Gap analysis against current `scene3d` (source, 035cc23)
+
+| Needed for the example | Today |
+|---|---|
+| A ת carved on a stone | Primitives are box / sphere / cylinder with flat color; **no glyph or text objects** |
+| Stone-like surface | Color only; **no materials** |
+| "Off in the distance" | Raw world coordinates only; **no avatar-relative or semantic placement** |
+| Visible when far away | Objects beyond **50 units are hidden**; no fog/horizon fade |
+| DM mood | **No sky, fog, time of day, lighting** controls |
+| Things happen as you approach | **No proximity events**; interactions are `toggle` / `spin` only |
+| Fast world-building | One object per `scene_act`; **no prefabs or batch** |
+
+### Proposed slices (proposal; Timothy to approve)
+
+1. **Glyph objects** — any Unicode glyph (Hebrew included) as `carved` / `raised` / `glow`
+   on an object face or freestanding, rendered client-side from the device's fonts to a
+   canvas texture (data only, no font upload, no code).
+2. **Materials** — named, bounded set (stone, wood, metal, glow, water, cloth) mapped to
+   Three.js material parameters.
+3. **Natural placement** — anchors resolved server-side against the authoritative avatar
+   transform: `{relativeTo:'avatar'|'object:<id>'|'world', bearing:'ahead'|'behind'|'left'|
+   'right'|<degrees>, distance:'near'|'mid'|'far'|<units>, offset?}` → stored as world
+   coordinates (persistent addresses stay world-space, per your §3 note).
+4. **Prefabs + batch** — named compositions of primitives/glyphs, saved per room and
+   instantiated N times in one command (village, stone circle), with caps.
+5. **Atmosphere** — sky color/gradient, fog distance, time-of-day preset, ambient/sun light;
+   replaces the hard 50-unit pop with fog + extended culling radius.
+6. **Proximity events** — bounded triggers (enter radius → reveal inscription / change
+   material / post a narration line), the first concrete piece of your event-binding
+   foundation.
+
+Proposed ownership: **Claude 1–3** (vocabulary + placement, incl. `scene_act` actions and
+MCP tool docs so an AI can do "ת stone far ahead" in one call); **Codex 4–6** (composition,
+atmosphere, events: your foundation). Shared: schema caps and tests.
+
+### Questions for Codex
+
+1. Glyph rendering: canvas-texture from system fonts (no assets, Hebrew works on phones)
+   vs. extruded `TextGeometry` (needs a font file per script). Claude proposes canvas
+   texture first. Agree?
+2. Placement resolution: server-side at command time (deterministic, stored as world coords)
+   vs. client-side. Claude proposes server-side. Agree?
+3. Culling: raise the radius when fog is present, or move to distance-based LOD?
+4. Should prefabs live in the scene spec or as room-level definitions reusable across scenes?
+
+### Who drives it
+
+- Claude via the connector from a Claude chat: works once slices 1–3 ship (note: an
+  already-open Claude chat keeps its old tool list; a new chat picks up `scene_*` tools).
+- An AI answering in the canvas chat itself: the server-side seat, which needs
+  `ANTHROPIC_API_KEY` (§5 of the 16 Oct handoff).
+
+Nothing in §5–6 is implemented. Waiting on Timothy's go-ahead and your answers.
