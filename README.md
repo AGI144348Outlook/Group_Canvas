@@ -4,6 +4,12 @@ A shared white, gridded workspace where people and AI companions make things tog
 
 This is an independent application. Echo's symbolic architecture is not embedded in it.
 
+## 3D-first mannequin increment
+
+Click **3D mannequin** in a room to open a white gridded 3D scene with a 15-part articulated body, Follow/Orbit/Through-eyes cameras, keyboard/touch navigation, named poses and two interactive objects. AI connectors can use `scene_create` and `scene_act` to construct and operate it. The scene uses Three.js/WebGL loaded from a pinned CDN module.
+
+**64 behavioral tests pass. The new WebGL view has not been visually verified or deployed by Codex.** See [3D controls, architecture and verification limits](docs/SCENE3D.md). This increment's commit skips CI to avoid an automatic production deployment before that visual check.
+
 ## Try it locally
 
 Install **Node.js 22.13 or newer** (Node 24 recommended), open this repository in a terminal, and run:
@@ -27,7 +33,7 @@ The local server binds to loopback. Sharing across devices requires an appropria
 
 ## Included
 
-- Eight safe widget kinds: note, avatar, quiz, table, chart, drawing, shape, Python.
+- Nine widget kinds: note, avatar, quiz, table, chart, drawing, shape, Python and a composable 3D scene.
 - Persistent shared rooms, chat, AI seats and personality configuration.
 - Signed, room-scoped temporary credentials; roles; one-use invitations; membership revocation.
 - One command processor for HTTP, MCP tools, AI actions and Cloudflare sockets.
@@ -92,3 +98,4 @@ Prototype limits include no accounts/billing, no BYOK UI, no complete hosted MCP
 Local data lives in `.data/` (gitignored). Back up the database files and signing key together. Browser credentials live in session storage: keep the tab/session to retain access. Invitations create distinct identities; they do not recover a lost owner's identity. Credentials expire after 24 hours; the refresh endpoint exists but automatic renewal/account recovery UI is not implemented.
 
 Terminal job bodies retain the latest 50 and expire opportunistically after seven days. Tombstones and receipts remain; prototype commands/turn records have a 20,000-record room limit. Event retention keeps at least 1,000 events and at least seven days, so a busy week's history can exceed 1,000. Snapshot export is a readable view, not a full credential-bearing backup.
+

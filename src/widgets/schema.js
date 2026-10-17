@@ -1,9 +1,12 @@
+import {sceneSchema} from '../../public/scene/model.js';
+import {validateSceneSpec} from '../scenes/actions.js';
 import {check,fields,text,finite,object} from '../commands/util.js';
-export const kinds=['note','avatar','python','table','chart','drawing','quiz','shape'];
+export const kinds=['note','avatar','python','table','chart','drawing','quiz','shape','scene3d'];
 const color=x=>{check(typeof x==='string'&&/^#[\da-fA-F]{6}$/.test(x),'invalid','Use a six-digit hex color');return x;};
 export function layout(x){fields(x,['x','y','width','height','collapsed'],['x','y','width','height','collapsed']);finite(x.x,0);finite(x.y,0);finite(x.width,180,1800);finite(x.height,100,1800);check(typeof x.collapsed==='boolean','invalid','collapsed must be boolean');return x;}
 export function spec(kind,s){check(kinds.includes(kind)&&object(s),'invalid','Unknown widget kind or spec');
  switch(kind){
+ case 'scene3d':validateSceneSpec(s);break;
  case 'note':fields(s,['text'],['text']);text(s.text,16000);break;
  case 'avatar':fields(s,['glyph','name','mood'],['glyph','name']);text(s.glyph,16);text(s.name,100);if(s.mood!==undefined)text(s.mood,200);break;
  case 'python':fields(s,['code'],['code']);text(s.code,16000);break;
@@ -18,6 +21,8 @@ export const layoutSchema={type:'object',additionalProperties:false,required:['x
 const obj=(properties,required=Object.keys(properties))=>({type:'object',additionalProperties:false,required,properties});
 const str={type:'string',maxLength:4000};
 export const specs={note:obj({text:{type:'string',maxLength:16000}}),avatar:obj({glyph:{type:'string',maxLength:16},name:{type:'string',maxLength:100},mood:{type:'string',maxLength:200}},['glyph','name']),python:obj({code:{type:'string',maxLength:16000}}),table:obj({columns:{type:'array',minItems:1,maxItems:20,items:{type:'string',maxLength:100}},rows:{type:'array',maxItems:200,items:{type:'array',maxItems:20,items:{type:['string','number','boolean','null']}}}}),chart:obj({labels:{type:'array',maxItems:100,items:str},values:{type:'array',maxItems:100,items:{type:'number'}}}),quiz:obj({question:str,options:{type:'array',minItems:2,maxItems:8,items:{type:'string',maxLength:500}},answerIndex:{type:'integer',minimum:0}}),drawing:obj({strokes:{type:'array',maxItems:200,items:obj({color:{type:'string',pattern:'^#[0-9a-fA-F]{6}$'},points:{type:'array',maxItems:500,items:{type:'array',minItems:2,maxItems:2,items:{type:'number',minimum:0,maximum:2000}}}})}}),shape:obj({shape:{enum:['rect','circle','line','text']},color:{type:'string',pattern:'^#[0-9a-fA-F]{6}$'},text:{type:'string',maxLength:1000}},['shape','color'])};
-export const createSchema={type:'object',anyOf:kinds.map(kind=>obj({id:{type:'string',minLength:1,maxLength:160},kind:{const:kind},title:{type:'string',maxLength:100},layout:layoutSchema,spec:specs[kind]}))};
+specs.scene3d=sceneSchema;
+export const createSchema=obj({id:{type:'string',minLength:1,maxLength:160},kind:{type:'string',enum:kinds},title:{type:'string',maxLength:100},layout:layoutSchema,spec:{anyOf:Object.values(specs)}});
 export const updateSchema=obj({id:{type:'string'},expectedWidgetVersion:{type:'integer',minimum:0},title:{type:'string',maxLength:100},layout:layoutSchema,spec:{anyOf:Object.values(specs)}},['id','expectedWidgetVersion']);
 export const deleteSchema=obj({id:{type:'string'},expectedWidgetVersion:{type:'integer',minimum:0}});
+

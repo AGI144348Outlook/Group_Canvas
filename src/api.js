@@ -47,8 +47,9 @@ export async function mcp(req,engine,p){
  if(b.method==='tools/call'){const a=b.params?.arguments||{},name=b.params?.name;
   try{let result;
    if(name==='room_inspect')result=engine.snapshot(p);
-   else{check(['say','widget_create','widget_update','widget_delete'].includes(name),'invalid','Unknown tool');const op=name==='say'?'chat.say':name.replace('_','.');result=await engine.submit(p,{contract:'gc/1',id:id(),op,payload:a,...(op.startsWith('widget.')?{expectedVersion:engine.read().version}:{})});}
+   else{check(['say','widget_create','widget_update','widget_delete','scene_act','scene_create'].includes(name),'invalid','Unknown tool');const op=name==='say'?'chat.say':name.replace('_','.');result=await engine.submit(p,{contract:'gc/1',id:id(),op,payload:a,...((op.startsWith('widget.')||op==='scene.create')?{expectedVersion:engine.read().version}:{})});}
    return reply({content:[{type:'text',text:JSON.stringify(result)}],isError:result?.status==='rejected'});
   }catch(e){if(!(e instanceof Fault))throw e;return reply({content:[{type:'text',text:JSON.stringify({status:'rejected',code:e.code,reason:e.message})}],isError:true});}}
  return reply(null,{code:-32601,message:'Method not found'});
 }
+

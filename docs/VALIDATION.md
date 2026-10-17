@@ -21,3 +21,9 @@ The Durable Object tests replace only the Cloudflare base class with a shim and 
 `tools/browser-smoke.py` is included for a normal development environment. It routes browser requests to the real Node handlers over a JSON-lines subprocess, allowing UI testing without opening an HTTP port. Python Playwright and Chromium are optional development prerequisites. The bridge supplies a synthetic short SSE stream, so even a successful run would not replace testing real long-lived network reconnection.
 
 The Node server, UI and Cloudflare configuration are supplied as a runnable prototype. Current evidence supports the command, handler, persistence and adapter logic; deployment and visual integration remain explicit acceptance steps.
+
+
+
+## 3D increment — 17 October 2026
+
+The expanded suite passes **64 tests**: the 46-test connector baseline plus 18 new scene scenarios. See `docs/SCENE3D.md` for the split between pure geometry/model tests, request-handler/connector verification and unverified WebGL rendering. New browser modules and the application pass syntax checks. Chromium launch and CDN download remain blocked in this sandbox. No deployment or paid model call was performed for this increment.

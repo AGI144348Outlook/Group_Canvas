@@ -1,6 +1,9 @@
+import {actionSchema} from '../scenes/actions.js';
 import {Fault,check} from '../commands/util.js';
-import {createSchema,updateSchema,deleteSchema} from '../widgets/schema.js';
+import {createSchema,updateSchema,deleteSchema,layoutSchema} from '../widgets/schema.js';
 export const tools=[{name:'say',description:'Say something in the current thread',inputSchema:{type:'object',additionalProperties:false,required:['text'],properties:{text:{type:'string',maxLength:4000}}}},{name:'widget_create',description:'Create a persistent safe widget. Provide all five layout fields. Table rows must match columns; chart series must match; quiz answerIndex must be within options.',inputSchema:createSchema},{name:'widget_update',description:'Modify an existing widget, using its current version. Spec must match its existing kind.',inputSchema:updateSchema},{name:'widget_delete',description:'Delete an existing widget using its version.',inputSchema:deleteSchema}];
+tools.push({name:'scene_create',description:'Create a 3D gridded scene with an articulated mannequin, lamp and block. This is the easiest way to start 3D. Scene state and editable body parts are visible through room_inspect. Use scene_act to take control, move, pose, interact or edit objects.',inputSchema:{type:'object',additionalProperties:false,required:['id','title'],properties:{id:{type:'string',minLength:1,maxLength:160},title:{type:'string',maxLength:100},layout:layoutSchema}}});
+tools.push({name:'scene_act',description:'Operate a scene3d. Inspect room first for sceneRuntime.version (0 if absent). Acquire control before move/pose/interact; release when done. Use object.add/update/remove or part.update to construct the scene. Moves are ground dx/dz, maximum length 2; interact within 2.5 units. Conflicts require inspection, not guessing versions.',inputSchema:actionSchema});
 export const capabilities={openai:{nativeTools:true,streaming:false,images:false},anthropic:{nativeTools:true,streaming:false,images:false},gemini:{nativeTools:true,streaming:false,images:false},demo:{nativeTools:false,streaming:false,images:false}};
 export async function complete(seat,prompt,context,env,{fetcher=fetch,signal}={}){
  const provider=seat.provider,key=env[{openai:'OPENAI_API_KEY',anthropic:'ANTHROPIC_API_KEY',gemini:'GEMINI_API_KEY'}[provider]];
@@ -20,3 +23,4 @@ export async function complete(seat,prompt,context,env,{fetcher=fetch,signal}={}
  return {text,actions,usage};
 }
 function parse(s){try{return JSON.parse(s);}catch{throw new Fault('invalid','Malformed provider tool arguments');}}
+
