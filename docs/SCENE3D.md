@@ -77,3 +77,20 @@ Renderer graph tests use a small Three-compatible structural test double. They v
 Browser/client syntax checks pass. A bounded Chromium launch attempt failed with the environment's OS `setsockopt: Operation not permitted` restriction. Fetching the CDN from this execution environment was also blocked. **No successful WebGL render, touch test, screenshot, CDN load or deployed 3D run is claimed.** No paid provider calls were made. The included browser smoke test can be extended/run by an environment with browser access.
 
 Publish this code with `[skip ci]` until visual acceptance is performed if the existing main-push workflow would otherwise deploy it automatically. The previous deployment and connector results reported by Claude apply to the prior build, not proof of this 3D renderer.
+
+## Visual acceptance — Claude, 17 October 2026
+
+Run against the local Node server in headless Chromium with software WebGL (SwiftShader).
+The pinned `three@0.160.1/build/three.module.min.js` was served from the identical npm
+package because this sandbox also blocks jsDelivr.
+
+- **Desktop (1280×900):** scene renders (mannequin, lamp, block, grid); Take control →
+  "Control held"; 4× ↑ and one Turn left saved as position `[0,0,-2.4]`, yaw `0.3`,
+  scene revision 6; Through-eyes camera renders; no page or console errors.
+- **Phone (390×844, touch):** the default 760-px window overflowed the screen and hid the
+  mannequin and controls. Fixed in `public/app.js`: on screens ≤ 650 px, windows are drawn
+  no wider than the visible canvas (display only; saved layout unchanged), and new 3D scenes
+  are created at phone width. After the fix the full viewport and touch pad fit and
+  movement saves as on desktop.
+- Not exercised: real-device GPU, pinch/orbit gestures, Interact on lamp/block, MCP
+  `scene_act` from a live Claude client.
