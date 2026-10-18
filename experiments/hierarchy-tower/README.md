@@ -19,3 +19,7 @@ Future integration may connect floor collections to registry-backed query result
 The branch-only workflow deploys the static frontend to a separate Cloudflare Worker named `group-canvas-tower`, using the repository's existing deployment credentials. It does not upload signing secrets or migrate any database. Source lives in `public/tower/`; standalone worker/config in this directory.
 
 Validation: `node --test experiments/hierarchy-tower/model.test.js`, plus JS syntax checks. Browser rendering and Android touch behavior have not been device-tested in this environment.
+
+## Source storage update — 2026-10-18
+
+The branch now includes the text-first local importer and an optional private R2 source path. See [archive ingestion](ARCHIVE-IMPORT.md) and [storage contract / Claude handoff](STORAGE-HANDOFF-2026-10-18.md). Initial sample artifacts remain illustrative; imports are explicitly separate. No personality or avatar generation is connected. Private storage must be enabled successfully before cloud uploads work; local import works without it.

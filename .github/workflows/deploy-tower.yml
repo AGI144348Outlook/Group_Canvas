@@ -20,18 +20,54 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WRANGLER_SEND_METRICS: 'false'
+      CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Test tower model and static worker
-        run: node --test experiments/hierarchy-tower/model.test.js
+        run: |
+          node experiments/hierarchy-tower/model.test.js
+          node experiments/hierarchy-tower/archive.test.js
+          node experiments/hierarchy-tower/upload.test.js
       - name: Check browser modules
         run: |
           node --check public/tower/tower.js
           node --check public/tower/model.js
+          node --check public/tower/archive-parser.js
+          node --check public/tower/archive-db.js
+          node --check public/tower/archive-import.js
+          node --check public/tower/archive-worker.js
+          node --check public/tower/archive-ui.js
+          node --check public/tower/cloud-source.js
+          node --check experiments/hierarchy-tower/upload-service.js
       - name: Install deployment tool
         run: npm install --no-audit --no-fund
-      - name: Deploy separate tower preview
+      - name: Prepare private source bucket
+        id: storage
+        run: |
+          if npx wrangler r2 bucket info group-canvas-citadel-sources > /tmp/citadel-r2-check.log 2>&1; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          elif npx wrangler r2 bucket create group-canvas-citadel-sources > /tmp/citadel-r2-create.log 2>&1; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::R2 source storage could not be prepared. Check R2 enablement and token Object Read & Write permissions. Local import will still deploy."
+            cat /tmp/citadel-r2-check.log
+            cat /tmp/citadel-r2-create.log
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy tower with private source binding
+        if: steps.storage.outputs.ready == 'true'
+        run: npx wrangler deploy --config experiments/hierarchy-tower/wrangler-storage.toml
+      - name: Configure operator-only source creation
+        if: steps.storage.outputs.ready == 'true'
+        run: |
+          if [ "${#CREATE_ROOM_KEY}" -ge 24 ]; then
+            printf '%s' "$CREATE_ROOM_KEY" | npx wrangler secret put SOURCE_CREATE_KEY --config experiments/hierarchy-tower/wrangler-storage.toml
+          else
+            echo "::warning::CREATE_ROOM_KEY must contain 24+ characters. Source creation remains disabled."
+          fi
+      - name: Deploy tower with local import only
+        if: steps.storage.outputs.ready != 'true'
         run: npx wrangler deploy --config experiments/hierarchy-tower/wrangler.toml

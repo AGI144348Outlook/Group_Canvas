@@ -1,5 +1,8 @@
+import {storageAPI} from './upload-service.js';
+export {TowerUpload} from './upload-service.js';
 export default {
  async fetch(request,env){
+  if(new URL(request.url).pathname.startsWith("/api/storage/"))return storageAPI(request,env);
   const response=await env.ASSETS.fetch(request);
   const headers=new Headers(response.headers);
   headers.set('x-content-type-options','nosniff');

@@ -1,3 +1,5 @@
+import {mountCloudSources} from './cloud-source.js';
+import {mountArchiveImporter,showArchiveFloor} from './archive-ui.js';
 import {FLOORS,floorFor,notesFor,validNotes,routeFloor} from './model.js';
 const $=id=>document.getElementById(id),make=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
 let active=null,notes=[],storageAvailable=true,openNote=null;
@@ -12,6 +14,7 @@ function renderRoute(){
  const f=routeFloor(location.hash);active=f;$('outside').hidden=!!f;$('interior').hidden=!f;
  document.title=f?`${f.name} · The Archive Tower`:'The Archive Tower · Group Canvas';
  if(!f){window.scrollTo(0,0);return;}
+ showArchiveFloor(f.id);
  $('floorAddress').textContent=`LEVEL ${f.number} / 06`;$('floorKicker').textContent=f.tag;$('floor-title').textContent=f.name;$('floorGlyph').textContent=f.mark;$('floorDescription').textContent=f.summary;$('floorPurpose').textContent=f.purpose;$('collectionTitle').textContent=f.artifact;$('search').value='';setTab(false);renderArtifacts();renderConnections();
  const i=FLOORS.indexOf(f);for(const [id,index,arrow] of [['lowerFloor',i-1,'↓'],['upperFloor',i+1,'↑']]){const next=FLOORS[index];$(id).disabled=!next;$(id).textContent=next?`${arrow} ${next.name}`:i===0?'Foundation':'Top level';$(id).onclick=()=>{if(next)location.hash=next.id;};}
  window.scrollTo(0,0);$('floor-title').focus({preventScroll:true});
@@ -33,3 +36,7 @@ $('deleteNote').onclick=()=>{notes=notes.filter(n=>n.id!==openNote);save();$('ar
 $('exportNotes').onclick=()=>{const blob=new Blob([JSON.stringify({format:'group-canvas-tower-notes/1',exported:new Date().toISOString(),notes},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=make('a');a.href=url;a.download='archive-tower-notes.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);};
 for(const b of document.querySelectorAll('[data-close]'))b.onclick=()=>b.closest('dialog').close();
 window.addEventListener('hashchange',renderRoute);renderRoute();if(!storageAvailable)notify('Browser storage is unavailable. Notes can be exported from a floor.');
+
+mountArchiveImporter().catch(e=>{document.getElementById("importStatus").textContent="Archive storage could not open: "+e.message;});
+
+mountCloudSources().catch(e=>{document.getElementById("cloudStatus").textContent=e.message;});
