@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/tower/**'
       - 'experiments/hierarchy-tower/**'
+      - 'experiments/adapter-cards/**'
       - '.github/workflows/deploy-tower.yml'
   workflow_dispatch: {}
 permissions:
@@ -31,6 +32,7 @@ jobs:
           node experiments/hierarchy-tower/model.test.js
           node experiments/hierarchy-tower/archive.test.js
           node experiments/hierarchy-tower/upload.test.js
+          node experiments/adapter-cards/engine.test.js
       - name: Check browser modules
         run: |
           node --check public/tower/tower.js
@@ -41,6 +43,8 @@ jobs:
           node --check public/tower/archive-worker.js
           node --check public/tower/archive-ui.js
           node --check public/tower/cloud-source.js
+          node --check public/tower/adapter-engine.js
+          node --check public/tower/adapter-ui.js
           node --check experiments/hierarchy-tower/upload-service.js
       - name: Install deployment tool
         run: npm install --no-audit --no-fund
