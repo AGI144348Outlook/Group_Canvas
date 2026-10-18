@@ -1,3 +1,4 @@
+import {sessionAPI} from '../session-towers/service.js';
 import {digest,boundedBody,json} from './upload-service.js';
 const fail=(message,status=400)=>{throw Object.assign(Error(message),{status});};
 const validId=id=>typeof id==='string'&&/^[a-f0-9-]{36}$/.test(id);
@@ -21,6 +22,7 @@ export class FileCabinet{
  async collection(id){if(id==='inbox')return {id:'inbox',name:'Inbox'};const c=await this.ctx.storage.get('collection:'+id);if(!c)fail('Collection not found',404);return c;}
  async handle(request){
   const u=new URL(request.url),path=u.pathname;
+  if(path==='/towers'||path.startsWith('/towers/'))return sessionAPI(request,this);
   if(path==='/collections'&&request.method==='GET'){const rows=await this.ctx.storage.list({prefix:'collection:',limit:100});return json({collections:[{id:'inbox',name:'Inbox'},...rows.values()]});}
   if(path==='/collections'&&request.method==='POST'){const b=await body(request);if(!validId(b.id)||typeof b.name!=='string'||!b.name.trim()||b.name.length>80)fail('Collection ID and name required');const old=await this.ctx.storage.get('collection:'+b.id);if(old){if(old.name!==b.name.trim())fail('Collection ID collision',409);return json(old);}const all=await this.ctx.storage.list({prefix:'collection:',limit:100});if(all.size>=100)fail('This prototype supports 100 collections');const c={id:b.id,name:b.name.trim(),created:new Date().toISOString()};await this.ctx.storage.put('collection:'+b.id,c);return json(c,201);}
   if(path==='/files'&&request.method==='GET'){

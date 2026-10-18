@@ -5,6 +5,8 @@ on:
     paths:
       - 'public/tower/**'
       - 'experiments/hierarchy-tower/**'
+      - 'experiments/session-towers/**'
+      - 'tools/session-towers/**'
       - 'experiments/adapter-cards/**'
       - '.github/workflows/deploy-tower.yml'
   workflow_dispatch: {}
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -34,6 +36,10 @@ jobs:
           node experiments/hierarchy-tower/upload.test.js
           node experiments/hierarchy-tower/filing.test.js
           node experiments/adapter-cards/engine.test.js
+          node experiments/session-towers/engine.test.js
+          node experiments/session-towers/service.test.js
+          node experiments/session-towers/cards.test.js
+          node tools/session-towers/run.test.mjs
       - name: Check browser modules
         run: |
           node --check public/tower/tower.js
@@ -49,6 +55,8 @@ jobs:
           node --check experiments/hierarchy-tower/upload-service.js
           node --check experiments/hierarchy-tower/filing-service.js
           node --check public/tower/files.js
+          node --check public/tower/sessions.js
+          node --check experiments/session-towers/service.js
       - name: Install deployment tool
         run: npm install --no-audit --no-fund
       - name: Prepare private source bucket
@@ -82,3 +90,7 @@ jobs:
       - name: Verify live filing storage with synthetic data
         if: steps.storage.outputs.ready == 'true'
         run: node experiments/hierarchy-tower/filing-live-check.js
+
+      - name: Verify output bindings and build approved private session towers
+        if: steps.storage.outputs.ready == 'true'
+        run: node tools/session-towers/run.mjs

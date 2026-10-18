@@ -21,3 +21,11 @@ class_name = "FileCabinet"
 [[migrations]]
 tag = "filing-cabinet-v1"
 new_sqlite_classes = ["FileCabinet"]
+
+[[r2_buckets]]
+binding = "SELF_OUTPUT"
+bucket_name = "group-canvas-tower-self"
+
+[[r2_buckets]]
+binding = "JULIAN_OUTPUT"
+bucket_name = "group-canvas-tower-julian"
