@@ -23,3 +23,7 @@ Validation: `node --test experiments/hierarchy-tower/model.test.js`, plus JS syn
 ## Source storage update — 2026-10-18
 
 The branch now includes the text-first local importer and an optional private R2 source path. See [archive ingestion](ARCHIVE-IMPORT.md) and [storage contract / Claude handoff](STORAGE-HANDOFF-2026-10-18.md). Initial sample artifacts remain illustrative; imports are explicitly separate. No personality or avatar generation is connected. Private storage must be enabled successfully before cloud uploads work; local import works without it.
+
+## File-storage focus
+
+A standalone Android file cabinet is available at `files.html`. It uses private R2 and a persistent server inventory, with operator-only access and no AI/character processing. See [FILING.md](FILING.md) for capabilities, bounds and test evidence.

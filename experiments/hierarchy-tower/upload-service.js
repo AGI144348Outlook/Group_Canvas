@@ -33,8 +33,32 @@ export class TowerUpload{
    s={id:b.id,source,tokenHash:b.tokenHash,key,uploadId:upload.uploadId,parts:[],status:'uploading',created:new Date().toISOString()};await this.persist(s);return json(this.snapshot(s));
   }
   if(!s)fail('Upload not found',404);
+  // Internal DO calls are reachable only through same-worker bindings, never public routing.
+  if(url.pathname.startsWith('/internal/')){
+   const op=url.pathname.slice(10);
+   if(op==='status'&&request.method==='GET')return json(this.snapshot(s));
+   if(op==='remove'&&request.method==='DELETE'){
+    if(s.status==='deleted')return json({deleted:true});
+    const was=s.removingFrom||s.status;s={...s,status:'deleting',removingFrom:was};await this.persist(s);
+    if(was==='uploading'&&!await this.env.SOURCES.head(s.key)){try{await this.env.SOURCES.resumeMultipartUpload(s.key,s.uploadId).abort();}catch(e){if(e.code!=='NoSuchUpload'&&e.status!==404)throw e;}}
+    await this.env.SOURCES.delete(s.key);s.status='deleted';await this.persist(s);return json({deleted:true});
+   }
+   if(op==='download'&&request.method==='GET'){
+    if(s.status!=='complete')fail('Source is not complete',409);const object=await this.env.SOURCES.get(s.key);if(!object)fail('File bytes unavailable',404);
+    return new Response(object.body,{headers:{'content-type':'application/octet-stream','content-length':String(s.source.size),'cache-control':'no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"}});
+   }
+   if(op.startsWith('parts/')||op==='complete'){
+    const headers=new Headers(request.headers);
+    return this.operation(new Request('https://upload/'+op,{method:request.method,headers,body:request.body,...(request.body?{duplex:'half'}:{})}),s);
+   }
+   fail('Internal operation not supported',405);
+  }
   const token=(request.headers.get('authorization')||'').replace(/^Bearer /,'');if(!token||await digest(token)!==s.tokenHash)fail('Invalid private upload credential',401);
   if(url.pathname==='/status'&&request.method==='GET')return json(this.snapshot(s));
+  return this.operation(request,s);
+ }
+ async operation(request,s){
+  const url=new URL(request.url);
   const part=url.pathname.match(/^\/parts\/(\d+)$/);
   if(part&&request.method==='PUT'){
    if(s.status!=='uploading')fail('Upload is already complete',409);const number=Number(part[1]),size=expectedPart(s.source,number),data=await boundedBody(request,PART);if(data.length!==size)fail('Part length does not match the source');const hash=await digest(data);if(request.headers.get('x-part-sha256')!==hash)fail('Part checksum mismatch');

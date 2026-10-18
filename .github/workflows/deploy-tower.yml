@@ -32,6 +32,7 @@ jobs:
           node experiments/hierarchy-tower/model.test.js
           node experiments/hierarchy-tower/archive.test.js
           node experiments/hierarchy-tower/upload.test.js
+          node experiments/hierarchy-tower/filing.test.js
           node experiments/adapter-cards/engine.test.js
       - name: Check browser modules
         run: |
@@ -46,6 +47,8 @@ jobs:
           node --check public/tower/adapter-engine.js
           node --check public/tower/adapter-ui.js
           node --check experiments/hierarchy-tower/upload-service.js
+          node --check experiments/hierarchy-tower/filing-service.js
+          node --check public/tower/files.js
       - name: Install deployment tool
         run: npm install --no-audit --no-fund
       - name: Prepare private source bucket
@@ -75,3 +78,7 @@ jobs:
       - name: Deploy tower with local import only
         if: steps.storage.outputs.ready != 'true'
         run: npx wrangler deploy --config experiments/hierarchy-tower/wrangler.toml
+
+      - name: Verify live filing storage with synthetic data
+        if: steps.storage.outputs.ready == 'true'
+        run: node experiments/hierarchy-tower/filing-live-check.js

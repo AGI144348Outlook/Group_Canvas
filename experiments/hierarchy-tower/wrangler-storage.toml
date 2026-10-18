@@ -14,3 +14,10 @@ class_name = "TowerUpload"
 [[migrations]]
 tag = "citadel-uploads-v1"
 new_sqlite_classes = ["TowerUpload"]
+
+[[durable_objects.bindings]]
+name = "CABINETS"
+class_name = "FileCabinet"
+[[migrations]]
+tag = "filing-cabinet-v1"
+new_sqlite_classes = ["FileCabinet"]
