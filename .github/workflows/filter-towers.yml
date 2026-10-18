@@ -1,0 +1,30 @@
+name: Build private derived filter towers
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths:
+      - 'tools/tower-filters/**'
+      - '.github/workflows/filter-towers.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: private-filter-towers
+  cancel-in-progress: false
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test synthetic source and branch handling
+        run: |
+          node tools/tower-filters/filter.test.mjs
+          node tools/tower-filters/run.test.mjs
+      - name: Derive private towers from completed R2 sources
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/tower-filters/run.mjs
