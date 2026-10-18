@@ -1,0 +1,30 @@
+name: Prepare private adapter datasets (no training)
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths:
+      - 'experiments/adapter-training/prepare.js'
+      - 'experiments/adapter-training/prepare.test.js'
+      - 'tools/adapter-training/prepare.mjs'
+      - '.github/workflows/prepare-adapter-datasets.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: private-adapter-dataset-preparation
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test deterministic preparation on synthetic data
+        run: node experiments/adapter-training/prepare.test.js
+      - name: Prepare both private datasets without starting training
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/adapter-training/prepare.mjs
