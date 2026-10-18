@@ -3,7 +3,8 @@ on:
   push:
     branches: [experiment/hierarchy-tower]
     paths:
-      - 'tools/archive-transfer/**'
+      - 'tools/archive-transfer/copy-to-r2.mjs'
+      - 'tools/archive-transfer/source-manifest.json'
       - '.github/workflows/copy-echo-archives.yml'
   workflow_dispatch: {}
 permissions:
