@@ -1,0 +1,36 @@
+name: Copy verified Echo conversation blocks to private R2
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths:
+      - 'tools/archive-transfer/**'
+      - '.github/workflows/copy-echo-archives.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: echo-archive-copy
+  cancel-in-progress: false
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check transfer script
+        run: node --check tools/archive-transfer/copy-to-r2.mjs
+      - name: Copy source bytes and verify full private read-back
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/archive-transfer/copy-to-r2.mjs
+      - name: Retain provenance manifest (no conversation text)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: echo-archive-r2-copy-manifest
+          path: archive-transfer-result/*.json
+          if-no-files-found: ignore
+          retention-days: 14

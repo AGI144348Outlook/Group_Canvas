@@ -1,0 +1,37 @@
+{
+  "repository": "AGI144348Outlook/Echo_Green_Future",
+  "branch": "chatgpt-conversation-archive",
+  "commit": "1b029f5cb2fa02ce80f1aec41ac31c3f1de7f9f2",
+  "files": [
+    {
+      "path": "conversations-000.json",
+      "size": 6603710,
+      "gitBlobSha1": "c74fb4e17530110a3191f1a588fe1aca2053998b",
+      "type": "conversation-block"
+    },
+    {
+      "path": "conversations-001.json",
+      "size": 8520675,
+      "gitBlobSha1": "bfb75cc5cc65287df44c825942ac2977745d66ec",
+      "type": "conversation-block"
+    },
+    {
+      "path": "conversations-002.json",
+      "size": 12968694,
+      "gitBlobSha1": "a85810780a03671a55daeca3513709e0ec4a755d",
+      "type": "conversation-block"
+    },
+    {
+      "path": "conversations-005.json",
+      "size": 11374566,
+      "gitBlobSha1": "1aecde4bb1c72047d0e4253df9a3b06de6c63c49",
+      "type": "conversation-block"
+    },
+    {
+      "path": "shared_conversations.json",
+      "size": 2085,
+      "gitBlobSha1": "e6a5c9a13f039cfbfd08965dcb8572558dcc6a55",
+      "type": "shared-metadata"
+    }
+  ]
+}
