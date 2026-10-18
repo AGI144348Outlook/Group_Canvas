@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caustic Lens</title>
+<style>
+:root{--bg:#faf9f5;--card:#f1efe8;--text:#1f1e1c;--muted:#6b6a64;--border:rgba(0,0,0,.15);--ok-bg:#eaf3de;--ok:#3b6d11;--wall:#241f1a}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1b19;--card:#2c2c2a;--text:#f1efe8;--muted:#b4b2a9;--border:rgba(255,255,255,.18);--ok-bg:#27500a;--ok:#c0dd97}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;padding:16px;max-width:420px;margin:0 auto}
+h1{font-size:18px;font-weight:500;margin:0 0 4px}
+p.sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+canvas#card{width:100%;border-radius:12px;display:block;background:var(--wall)}
+.row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.row label{font-size:14px;color:var(--muted);width:72px}
+.row input{flex:1}
+.row span{font-size:14px;font-weight:500;min-width:36px;text-align:right}
+.badge{font-size:13px;padding:4px 10px;border-radius:8px;background:var(--card);color:var(--muted)}
+.badge.lock{background:var(--ok-bg);color:var(--ok)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+button{font:inherit;font-size:14px;padding:10px;border-radius:8px;border:.5px solid var(--border);background:transparent;color:var(--text)}
+.hint{font-size:12px;color:var(--muted);margin-bottom:12px}
+</style>
+</head>
+<body>
+<h1>Caustic lens</h1>
+<p class="sub">A sculpted glass block swept through one arc, projecting light strands onto an index card.</p>
+<canvas id="card" width="340" height="300"></canvas>
+<div class="row" style="justify-content:space-between;margin:10px 0 4px">
+  <span id="lock" class="badge">Searching</span>
+  <span style="font-size:13px;color:var(--muted);font-weight:400">Score <b id="sc" style="font-weight:500;color:var(--text)">0</b></span>
+</div>
+<canvas id="strip" width="340" height="44" style="width:100%;display:block;margin:6px 0 2px"></canvas>
+<div class="hint">Sweep scores across the arc. Green ticks mark lattice peaks.</div>
+<div class="row"><label for="ang">Angle</label><input type="range" id="ang" min="0" max="90" step="1" value="20"><span id="angO">20°</span></div>
+<div class="row"><label for="dep">Depth</label><input type="range" id="dep" min="0" max="100" step="1" value="35"><span id="depO">35</span></div>
+<div class="row"><label for="vp">Vanish pt</label><input type="range" id="vp" min="0" max="100" step="1" value="50"><span id="vpO">50</span></div>
+<div class="row"><label for="sc2">Sculpt</label><input type="range" id="sc2" min="1" max="99" step="1" value="7"><span id="sc2O">7</span></div>
+<div class="btns"><button id="play">Flip book</button><button id="next">Next lock</button></div>
+<script>
+// Caustic lens demo. Model: a glass block whose surface is a sum of waves;
+// rays pass through it, bend by the surface gradient, and land on a card.
+// Brightness = ray density. Folds/cusps = where density spikes.
+const W = 170, H = 150, FR = 91;              // card resolution, frames in the arc
+const card = document.getElementById('card'), cx = card.getContext('2d');
+const off = document.createElement('canvas'); off.width = W; off.height = H;
+const ox = off.getContext('2d');
+const strip = document.getElementById('strip'), sx = strip.getContext('2d');
+let waves = [], scores = new Array(FR).fill(0), peaks = [], playing = false, timer = null;
+
+function rng(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+
+// Sculpt: build the glass surface from a seed (mutable lens).
+function sculpt(seed) {
+  const r = rng(seed * 7919 + 13); waves = [];
+  for (let i = 0; i < 5; i++) {
+    const k = 2 + r() * 5, t = r() * Math.PI * 2;
+    waves.push({ a: 0.6 / k * (0.5 + r()), kx: k * Math.cos(t), ky: k * Math.sin(t), p: r() * 6.283 });
+  }
+}
+
+// Project: hold the block at frame fi of the arc, trace n*n rays, return density on the card.
+function project(fi, n) {
+  const a = fi / (FR - 1) * Math.PI * 0.5 + 0.15, ca = Math.cos(a), sa = Math.sin(a);
+  const stretch = 1 + 0.9 * Math.sin(a * 2);  // oblique incidence stretches the pattern
+  const d = new Float32Array(W * H), L = 0.55;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const x = i / n * 2 - 1, y = j / n * 2 - 1;
+    const xr = x * ca - y * sa, yr = x * sa + y * ca;
+    let gx = 0, gy = 0;
+    for (const w of waves) { const c = w.a * Math.cos(w.kx * xr + w.ky * yr + w.p); gx += c * w.kx; gy += c * w.ky; }
+    const ux = (x + L * (gx * ca + gy * sa)) * stretch * 0.45;
+    const uy = (y + L * (-gx * sa + gy * ca)) * 0.45;
+    const px = Math.floor((ux * 0.5 + 0.5) * W), py = Math.floor((uy * 0.5 + 0.5) * H);
+    if (px >= 0 && px < W && py >= 0 && py < H) d[py * W + px] += 1;
+  }
+  return d;
+}
+
+// Score: reward sharp strands and crossing nodes; penalize glare (too much bright area).
+function score(d) {
+  let s = 0, c = 0;
+  for (let i = 0; i < d.length; i++) if (d[i] > 0) { s += d[i]; c++; }
+  const m = s / Math.max(c, 1); let strands = 0, nodes = 0;
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const v = d[y * W + x];
+    if (v > 4 * m) {
+      strands++;
+      if (v > 9 * m) {
+        let mx = true;
+        for (let dy = -1; dy <= 1 && mx; dy++) for (let dx = -1; dx <= 1; dx++)
+          if ((dx || dy) && d[(y + dy) * W + x + dx] > v) { mx = false; break; }
+        if (mx) nodes++;
+      }
+    }
+  }
+  const frac = strands / Math.max(c, 1);
+  let sc = nodes * Math.sqrt(strands);
+  if (frac > 0.2) sc *= Math.max(0, 1 - (frac - 0.2) * 4);
+  return sc;
+}
+
+// Sweep the whole arc at low resolution and find lattice-lock peaks.
+function sweep() {
+  for (let f = 0; f < FR; f++) scores[f] = score(project(f, 80));
+  const mx = Math.max(...scores) || 1; scores = scores.map(v => v / mx * 100); peaks = [];
+  for (let f = 1; f < FR - 1; f++)
+    if (scores[f] >= scores[f - 1] && scores[f] > scores[f + 1] && scores[f] > 55) peaks.push(f);
+}
+
+function render() {
+  const f = +ang.value, dep = +document.getElementById('dep').value / 100, vp = +document.getElementById('vp').value / 100;
+  const d = project(f, 150); let mx = 0; for (const v of d) if (v > mx) mx = v;
+  const img = ox.createImageData(W, H), lm = Math.log(1 + mx * 0.6);
+  for (let i = 0; i < d.length; i++) {
+    const t = Math.min(1, Math.log(1 + d[i]) / lm);
+    img.data[i*4] = 36 + 219 * Math.min(1, t * 1.3);
+    img.data[i*4+1] = 31 + 110 * t * t + 60 * Math.max(0, t - 0.8);
+    img.data[i*4+2] = 26 + 70 * t * t; img.data[i*4+3] = 255;
+  }
+  ox.putImageData(img, 0, 0);
+  const CW = card.width, CH = card.height;
+  cx.fillStyle = '#241f1a'; cx.fillRect(0, 0, CW, CH);
+  // Vanishing-point depth: each row shrinks toward the vanishing point (cheap perspective warp).
+  for (let y = 0; y < CH; y++) {
+    const s = 1 - dep * 0.75 * (1 - y / CH), w = CW * s, xo = vp * (CW - w);
+    cx.drawImage(off, 0, Math.floor(y / CH * H), W, 1, xo, y, w, 1.5);
+  }
+  document.getElementById('sc').textContent = Math.round(scores[f]);
+  document.getElementById('angO').textContent = Math.round(f / (FR - 1) * 90) + '°';
+  const lk = document.getElementById('lock'), locked = peaks.some(p => Math.abs(p - f) <= 1);
+  lk.textContent = locked ? 'Lattice lock' : 'Searching'; lk.className = locked ? 'badge lock' : 'badge';
+  drawStrip(f);
+}
+
+function drawStrip(f) {
+  const SW = strip.width, SH = strip.height, bw = SW / FR;
+  sx.clearRect(0, 0, SW, SH); sx.fillStyle = '#D85A30'; sx.globalAlpha = .55;
+  for (let i = 0; i < FR; i++) { const h = scores[i] / 100 * (SH - 10); sx.fillRect(i * bw, SH - h, Math.max(bw - .5, 1), h); }
+  sx.globalAlpha = 1; sx.fillStyle = '#1D9E75';
+  for (const p of peaks) sx.fillRect(p * bw, 0, Math.max(bw, 2), 6);
+  sx.fillStyle = getComputedStyle(document.body).color; sx.fillRect(f * bw + bw / 2 - 1, 0, 2, SH);
+}
+
+const ang = document.getElementById('ang');
+['ang', 'dep', 'vp', 'sc2'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    if (id !== 'ang') document.getElementById(id + 'O').textContent = el.value;
+    if (id === 'sc2') { sculpt(+el.value); sweep(); }
+    render();
+  });
+});
+document.getElementById('play').addEventListener('click', e => {
+  playing = !playing; e.target.textContent = playing ? 'Pause' : 'Flip book';
+  if (playing) timer = setInterval(() => { ang.value = (+ang.value + 1) % FR; render(); }, 90);
+  else clearInterval(timer);
+});
+document.getElementById('next').addEventListener('click', () => {
+  if (!peaks.length) return; const f = +ang.value, n = peaks.find(p => p > f + 1);
+  ang.value = n !== undefined ? n : peaks[0]; render();
+});
+sculpt(7); sweep(); render();
+</script>
+</body>
+</html>
