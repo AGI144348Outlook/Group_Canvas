@@ -29,3 +29,6 @@ bucket_name = "group-canvas-tower-self"
 [[r2_buckets]]
 binding = "JULIAN_OUTPUT"
 bucket_name = "group-canvas-tower-julian"
+
+[ai]
+binding = "AI"

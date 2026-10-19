@@ -1,3 +1,4 @@
+import {cardChat} from '../card-chat/service.js';
 import {boundedBody,digest,json} from '../hierarchy-tower/upload-service.js';
 const hex=/^[a-f0-9]{64}$/,ids=/^[a-f0-9-]{36}$/;
 const fail=(s,status=400)=>{throw Object.assign(Error(s),{status});};
@@ -10,6 +11,7 @@ async function manifest(cabinet,tower,hash){const m=await object(cabinet,tower,h
 async function checkSources(cabinet,sources){if(!Array.isArray(sources)||sources.length>100)fail('Source list exceeds prototype limit');for(const source of sources){if(!hex.test(source.sha256))fail('Full source hash required');await sourceAvailable(cabinet,source.fileId);}}
 export async function sessionAPI(request,cabinet){
  const path=new URL(request.url).pathname,env=cabinet.env;
+ if(path==='/towers/chat'||path.startsWith('/towers/chat/'))return cardChat(request,cabinet,async q=>{const r=await sessionAPI(new Request('https://cabinet/towers/query',{method:'POST',body:JSON.stringify(q)}),cabinet);if(!r.ok)fail('Evidence query failed',r.status);return r.json();});
  if(path==='/towers/config'&&request.method==='GET')return json({enabled:Boolean(env.SELF_OUTPUT&&env.JULIAN_OUTPUT),queryInterface:'Lattice JSON queries (not GraphQL)',towers:['self','julian','review']});
  if(!env.SELF_OUTPUT||!env.JULIAN_OUTPUT)fail('Session tower storage is not configured',503);
  if(path==='/towers/verify-bindings'&&request.method==='POST'){for(const name of Object.values(bindings)){const bucket=env[name],key='checks/session-'+crypto.randomUUID(),data='synthetic binding check';try{await bucket.put(key,data);const r=await bucket.get(key);if(!r||await new Response(r.body).text()!==data)fail('Binding read-back failed',503);}finally{await bucket.delete(key);}}return json({verified:true,syntheticOnly:true,cleaned:true});}

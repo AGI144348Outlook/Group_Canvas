@@ -6,6 +6,8 @@ on:
       - 'public/tower/**'
       - 'experiments/hierarchy-tower/**'
       - 'experiments/session-towers/**'
+      - 'experiments/card-chat/**'
+      - 'tools/card-chat/**'
       - 'tools/session-towers/**'
       - 'experiments/adapter-cards/**'
       - '.github/workflows/deploy-tower.yml'
@@ -40,6 +42,7 @@ jobs:
           node experiments/session-towers/service.test.js
           node experiments/session-towers/cards.test.js
           node tools/session-towers/run.test.mjs
+          node experiments/card-chat/service.test.js
       - name: Check browser modules
         run: |
           node --check public/tower/tower.js
@@ -57,6 +60,8 @@ jobs:
           node --check public/tower/files.js
           node --check public/tower/sessions.js
           node --check experiments/session-towers/service.js
+          node --check public/tower/chat.js
+          node --check experiments/card-chat/service.js
       - name: Install deployment tool
         run: npm install --no-audit --no-fund
       - name: Prepare private source bucket
@@ -94,3 +99,7 @@ jobs:
       - name: Verify output bindings and build approved private session towers
         if: steps.storage.outputs.ready == 'true'
         run: node tools/session-towers/run.mjs
+
+      - name: Evaluate hosted model and cards on bounded actual records
+        if: steps.storage.outputs.ready == 'true'
+        run: node tools/card-chat/live-check.mjs
