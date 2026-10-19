@@ -1,0 +1,23 @@
+name: Inspect private card-model test metrics (read only)
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths:
+      - 'tools/card-chat-diagnostics/read-report.mjs'
+      - '.github/workflows/card-chat-diagnostics.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Inspect metrics without logging private source or answer text
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/card-chat-diagnostics/read-report.mjs
