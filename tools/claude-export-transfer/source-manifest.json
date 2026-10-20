@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "source_repository": "AGI144348Outlook/Echo_Green_Future",
+  "source_commit": "dfb33e530338517f9837eeb35156245adf9c2bbe",
+  "bucket": "group-canvas-citadel-sources",
+  "prefix": "claude-exports/2026-10-20/",
+  "missing_expected_archives": [
+    "frames-000.zip"
+  ],
+  "files": [
+    {
+      "name": "artifact_data-000.zip",
+      "path": "docs/artifact_data-000.zip",
+      "bytes": 2282,
+      "git_blob_sha1": "dd5a426ff19da29e57b071ebe88c11f50186b99b"
+    },
+    {
+      "name": "claude_code_cloud-000.zip",
+      "path": "docs/claude_code_cloud-000.zip",
+      "bytes": 14513,
+      "git_blob_sha1": "c34f809a47439484c506b9ef1fa4dc714a293647"
+    },
+    {
+      "name": "conversations-000.zip",
+      "path": "docs/conversations-000.zip",
+      "bytes": 16640005,
+      "git_blob_sha1": "70938cc8b9a75e5395943e4615a8a2ea4b92a60e"
+    },
+    {
+      "name": "light_metadata-000.zip",
+      "path": "docs/light_metadata-000.zip",
+      "bytes": 4982,
+      "git_blob_sha1": "9c5a236cc745b22230e0f085001e1d6c9e8f249b"
+    },
+    {
+      "name": "manifest-4f396d43-7a90-425e-8357-17991a674aff-1792524451-1c5c9420-2026-10-20-19-29-26.json",
+      "path": "docs/manifest-4f396d43-7a90-425e-8357-17991a674aff-1792524451-1c5c9420-2026-10-20-19-29-26.json",
+      "bytes": 2120,
+      "git_blob_sha1": "2c56039847b27a6e1eeaedb0ee798a2f276e8cee"
+    },
+    {
+      "name": "memories-000.zip",
+      "path": "docs/memories-000.zip",
+      "bytes": 30457,
+      "git_blob_sha1": "039fb2969cd323c18f697a84df247234cfb5a87f"
+    },
+    {
+      "name": "projects-000.zip",
+      "path": "docs/projects-000.zip",
+      "bytes": 1362624,
+      "git_blob_sha1": "c6baf64da778464bbccea26b4d6332c159de0cc6"
+    }
+  ]
+}
