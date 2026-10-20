@@ -15,7 +15,7 @@ with sync_playwright() as p:
  page.locator('#reverse').click();assert 'Outside supported SVO order' in page.locator('#sentence-output').inner_text()
  page.locator('#restore-order').click();page.select_option('#predicate','have');assert 'has some parcel' in page.locator('#sentence-output').inner_text()
  page.select_option('#predicate','sleep');assert 'No tested inflection' in page.locator('#sentence-output').inner_text()
- page.locator('#reset').click();page.locator('#generalize').click();page.locator('#save').click();page.reload();page.locator('#load').click();page.get_by_text('Some dog carries some parcel.',exact=True).wait_for()
+ page.locator('#reset').click();page.locator('#generalize').click();page.locator('#save').click();page.reload();page.wait_for_function("document.body.dataset.ready==='true'");page.locator('#load').click();page.get_by_text('Some dog carries some parcel.',exact=True).wait_for()
  (HERE/'qa').mkdir(exist_ok=True)
  page.screenshot(path=str(HERE/'qa/mobile-cards.png'),full_page=True)
  page.locator('[data-tab="questions"]').click();page.locator('#word').fill('clock');page.locator('#definition').fill('an object measuring time');page.select_option('#category','');page.locator('#tag').click()
