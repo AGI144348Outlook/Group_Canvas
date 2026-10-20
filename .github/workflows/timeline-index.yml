@@ -1,0 +1,35 @@
+name: Private conversation chronology index
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/timeline-indexing/**', '.github/workflows/timeline-index.yml']
+permissions:
+  contents: read
+concurrency:
+  group: private-echo-timeline
+  cancel-in-progress: false
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check loader syntax
+        run: node --check tools/timeline-indexing/run.mjs
+      - name: Index private sources and verify derived output
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node tools/timeline-indexing/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: private-timeline-handoff
+          path: timeline-result/
+          retention-days: 1
