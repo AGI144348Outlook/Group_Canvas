@@ -1,7 +1,7 @@
 """Read one pinned private R2 archive; encrypt bounded research matches for its owner."""
 import hashlib, io, json, os, re, subprocess, tempfile, urllib.parse, urllib.request, zipfile
 from pathlib import Path
-TERMS = ['§dsl§', 'dsl registry', 'underside', 'inversion', 'invert', 'presentiat']
+TERMS = ['recursive return', 'recursive-return', 'recursive sentenc', 'sentence engine', 'sentencing engine', 'continuation', 'n+1', 'ⁿ+¹', 'suspend', 'unfinished expression']
 def text_of(msg):
     text = msg.get('text')
     if isinstance(text, str) and text:
