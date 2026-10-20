@@ -1,0 +1,51 @@
+name: Publish and test Echo artifact demos
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['demos/echo-prototypes/**', 'tools/demo-host/**', '.github/workflows/echo-demo-host.yml']
+permissions:
+  contents: read
+concurrency:
+  group: echo-artifact-demo-host
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check demo scripts
+        run: |
+          node --check demos/echo-prototypes/hosted/app.js
+          node --check tools/demo-host/worker.js
+      - name: Deploy isolated static demo host
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4 deploy --config tools/demo-host/wrangler.toml
+      - name: Read derived private timeline for browser QA
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/demo-host/read-summary.mjs
+      - name: Install browser controller
+        run: python -m pip install playwright==1.55.0
+      - name: Verify mobile hosted demos, Pyodide and private index loading
+        run: python demos/echo-prototypes/browser_test.py --python --url https://group-canvas-echo-demos.agi144348.workers.dev/ --private-index /tmp/private-timeline-for-qa.json
+      - name: Remove private QA file
+        if: always()
+        run: rm -f /tmp/private-timeline-for-qa.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: echo-artifact-demo-evidence
+          path: |
+            demos/echo-prototypes/qa/
+            demo-host-result/
+          retention-days: 7

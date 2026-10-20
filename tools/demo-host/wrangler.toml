@@ -1,0 +1,7 @@
+name = "group-canvas-echo-demos"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+[assets]
+directory = "../../demos/echo-prototypes/hosted"
+binding = "ASSETS"
+run_worker_first = true
