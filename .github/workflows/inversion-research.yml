@@ -1,0 +1,23 @@
+name: Private R2 inversion research
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/inversion-research/**', '.github/workflows/inversion-research.yml']
+permissions:
+  contents: read
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read and encrypt research matches
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python tools/inversion-research/search.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-inversion-research
+          path: encrypted-research/matches.cms
+          retention-days: 1
