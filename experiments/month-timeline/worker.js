@@ -17,7 +17,7 @@ export async function manifestReply(request,fetcher=fetch){
 }
 export default {async fetch(request,env){
  const url=new URL(request.url);
- if(url.pathname.startsWith('/api/'))return url.pathname==='/api/manifest'&&request.method==='GET'?manifestReply(request):reply({error:'Unsupported operation'},405);
+ if(url.pathname.startsWith('/api/'))return url.pathname==='/api/manifest'&&request.method==='GET'?manifestReply(request,env.CABINET?env.CABINET.fetch.bind(env.CABINET):fetch):reply({error:'Unsupported operation'},405);
  const response=await env.ASSETS.fetch(request);const headers=new Headers(response.headers);
  headers.set('content-security-policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");headers.set('x-content-type-options','nosniff');headers.set('referrer-policy','no-referrer');
  return new Response(response.body,{status:response.status,headers});

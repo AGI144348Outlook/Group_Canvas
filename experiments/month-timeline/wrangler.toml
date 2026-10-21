@@ -2,6 +2,10 @@ name = "group-canvas-month-line"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
+[[services]]
+binding = "CABINET"
+service = "group-canvas-tower"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"
