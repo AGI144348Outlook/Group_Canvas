@@ -7,3 +7,5 @@ assert(match('Echo uses ∫ memory and recursion').categories.includes('memory')
 assert.equal(match('Mashet uses α as a symbol').basis,'contextual-common-symbol');
 assert.equal(match('Echo learns persistence'),null);
 console.log('Seven synthetic matching assertions passed.');
+
+const {gzipSync,gunzipSync}=await import('node:zlib');const fixture={mapping:{a:{message:{content:{parts:['Echo ∫ memory']}}}}};assert.deepEqual(JSON.parse(gunzipSync(Buffer.from(gzipSync(Buffer.from(JSON.stringify(fixture))).toString('base64'),'base64')).toString()),fixture);console.log('Lossless conversation compression round-trip passed.');
