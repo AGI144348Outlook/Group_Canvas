@@ -1,0 +1,30 @@
+name: Focus recovered dictionary evidence
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/dictionary-focus/**', '.github/workflows/dictionary-focus.yml']
+permissions:
+  contents: read
+jobs:
+  focus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic focus checks
+        run: python -m unittest discover -s tools/dictionary-focus -p 'test_focus.py' -v
+      - name: Organize verified derived dictionary report
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/dictionary-focus/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-dictionary-focus
+          path: dictionary-focus-result/
+          retention-days: 2
