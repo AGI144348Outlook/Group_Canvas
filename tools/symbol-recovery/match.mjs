@@ -1,0 +1,6 @@
+export const distinctive=[...'☉⊕⊖⊗⊙⊚⊡⊠⊞⊟⊘∅∫∂∇∆↻↺⟳⟲⇢⇥↔↕⇧⇩⇑⇓⧖⌛⚖☯☢☣≋⋈⋉⋊◇◆◈'];
+export const common=[...'△▽◁▷○●□■επδλρΘξμγαβκτφησ'];
+const names=/unified\s+agi|symbolic\s+kernel|96[ -]symbol|glyph\s+grammar|master\s+(?:agi\s+)?kernel|☉[ₖk]|functional\s+logic\s+nodes/iu;
+const context=/echo|mashet|substrate|kernel|recurs|glyph|symbol|algorithm|intelligen|matrix|matrices/iu;
+export const categories={perception:/perce|percept|sensory|sensation|attention|ע/iu,memory:/memor|persist|retain|history|remember|trace/iu,recursion:/recurs|fractal|feedback|recur|loop/iu,space:/spatial|cartesian|grid|boundary|boundaries|avatar|door|maze|navigat/iu,learning:/learn|develop|adapt|plastic|train|expect|predict/iu,governance:/govern|gate|constraint|invariant|validat|permission/iu,synthesis:/synthes|emergen|unifi|coupl|integrat/iu};
+export function match(text){const strong=distinctive.filter(s=>text.includes(s)),weak=common.filter(s=>text.includes(s)),named=names.test(text),ctx=context.test(text);if(!named&&!(ctx&&(strong.length||weak.length)))return null;return {symbols:[...strong,...weak],basis:named?'named-kernel':strong.length?'contextual-distinctive-symbol':'contextual-common-symbol',categories:Object.entries(categories).filter(([,r])=>r.test(text)).map(([k])=>k),score:(named?100:0)+Math.min(strong.length,15)*3+Math.min(weak.length,10)};}

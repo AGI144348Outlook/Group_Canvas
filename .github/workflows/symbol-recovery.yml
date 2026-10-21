@@ -1,0 +1,37 @@
+name: Private symbolic-kernel recovery for Echo
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/symbol-recovery/**', '.github/workflows/symbol-recovery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: echo-symbol-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check synthetic match distinctions
+        run: |
+          node tools/symbol-recovery/match.test.mjs
+          node --check tools/symbol-recovery/run.mjs
+      - name: Recover private conversations and verify saved copies
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node tools/symbol-recovery/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-symbol-recovery
+          path: symbol-result/
+          retention-days: 2
