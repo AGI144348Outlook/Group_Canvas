@@ -1,0 +1,36 @@
+name: Private dictionary recovery with Echo
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/dictionary-research/**', '.github/workflows/dictionary-research.yml']
+permissions:
+  contents: read
+concurrency:
+  group: echo-dictionary-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic source-recovery tests
+        run: python -m unittest discover -s tools/dictionary-research -p 'test_search.py' -v
+      - name: Search private completed sources and preserve derived results
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node tools/dictionary-research/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-dictionary-recovery
+          path: dictionary-result/
+          retention-days: 2
+
