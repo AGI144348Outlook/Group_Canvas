@@ -1,0 +1,12 @@
+{
+  "echo-ucb": {
+    "before": 1,
+    "after": 2,
+    "total": 8
+  },
+  "counter": {
+    "before": 1,
+    "after": 8,
+    "total": 8
+  }
+}

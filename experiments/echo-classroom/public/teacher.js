@@ -1,0 +1,6 @@
+// Teacher fixture. This key is never passed to predict()/attempt().
+export const NAMES={'class-a':'Timothy','class-b':'Echo','class-c':'Visitor','new-a':'River','new-b':'Rowan','new-c':'Mica'};
+export function scenes(prefix='class'){const a=prefix+'-a',b=prefix+'-b',c=prefix+'-c';return [{entities:[a,b,c],speaker:b,addressee:a},{entities:[c,a,b],speaker:a,addressee:b},{entities:[b,c,a],speaker:c,addressee:a},{entities:[a,c,b],speaker:b,addressee:c}];}
+export function task(index=0,prefix='class'){const cases=scenes(prefix),scene=cases[Math.floor(index/2)%cases.length];return {word:index%2?'you':'I',scene};}
+export function answer(word,scene){return scene[{'I':'speaker','you':'addressee'}[word]];}
+export function assess(learner){const before=JSON.stringify(learner.state()),items=[];for(const s of scenes('new'))for(const word of ['I','you']){const prediction=learner.predict(word,s);items.push({word,scene:s,prediction,correct:prediction.entity===answer(word,s)});}if(before!==JSON.stringify(learner.state()))throw Error('Assessment mutated learner.');return {correct:items.filter(x=>x.correct).length,total:items.length,items,scope:'Synthetic role-reference selection only; not definition or general comprehension'};}

@@ -1,0 +1,42 @@
+name: Deploy and verify isolated Echo classroom
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['experiments/echo-classroom/**', '.github/workflows/echo-classroom.yml']
+permissions:
+  contents: read
+concurrency:
+  group: echo-classroom-artifact
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Python evidence parity and teaching state machine
+        run: |
+          node --test experiments/echo-classroom/test.mjs
+          node --check experiments/echo-classroom/public/app.js
+      - name: Deploy isolated synthetic classroom
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --yes wrangler@4 deploy --config experiments/echo-classroom/wrangler.toml
+      - name: Install browser controller
+        run: python -m pip install playwright==1.55.0
+      - name: Check Android-size teacher turns and evidence viewer
+        run: python experiments/echo-classroom/browser_test.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: echo-classroom-mobile-evidence
+          path: experiments/echo-classroom/qa/
+          retention-days: 7
