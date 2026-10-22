@@ -1,7 +1,7 @@
 import {PriorityCards} from './priorities.js';
 import {assess2} from './lesson2.js';
 import {currentLearner,pauseClassroom} from './app.js';
-import {registerPriorityReader} from './session-bridge.js';
+import {registerPriorityReader,externalTurnPending} from './session-bridge.js';
 const $=id=>document.getElementById(id),el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
 const KEY='echo-classroom-priorities-v1';let p=new PriorityCards(),lastCapture=0,lastEvent=null;
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s){p=new PriorityCards(null,s.state);lastCapture=Number.isInteger(s.lastCapture)?s.lastCapture:0;}}catch{}
@@ -9,7 +9,7 @@ registerPriorityReader(()=>p.state());
 function inventory(){const out={};for(const e of currentLearner().events)if(e.kind==='attempt')out[e.word.toLowerCase()]={seen:true,qualifications:[]};return out;}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({state:p.state(),lastCapture}));}catch{$('priority-status').textContent='Notes are temporary; device storage is unavailable. Export to retain them.';}}
 function describe(e){if(!e)return 'Notes are available now; Recess is opt-in and last priority.';return e.kind==='note-captured'?'First priority: captured '+e.card.template+' card '+e.card.id+'.':e.kind==='task-completed'?'Assigned inspection completed: '+e.entry.word+'. No vocabulary promoted.':e.kind==='recess-candidate'?'Recess selected “'+e.entry+'” and recorded a question. Teacher handover is now required.':e.kind==='blocked'?'Paused: '+e.reason.replaceAll('-',' ')+'.':e.kind;}
-function tick(){lastEvent=p.tick(inventory(),!!currentLearner().pending);save();render();return lastEvent;}
+function tick(){lastEvent=p.tick(inventory(),!!currentLearner().pending||externalTurnPending());save();render();return lastEvent;}
 function render(){
  $('recess-toggle').textContent=p.enabled?'Pause Recess':'Enable Recess';$('priority-count').textContent=p.notes.length+' note cards';$('priority-order').textContent=(currentLearner().pending?'Teacher turn pending · ':'')+p.note_queue.length+' notes queued · '+p.tasks.length+' assignments · Recess '+p.used+'/'+p.budget;
  $('priority-status').textContent=describe(lastEvent);$('handover').disabled=!p.handover&&!p.notes.some(n=>n.review==='unreviewed');$('priority-notes').replaceChildren();

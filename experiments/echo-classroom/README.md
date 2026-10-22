@@ -63,3 +63,18 @@ The personal dictionary is three teacher-supplied red candidate entries. Lowerca
 The visible controls provide first-priority note requests, an ordinary dictionary-inspection assignment, one controller step, enable/pause, teacher review/handover, Lesson 2 local assessment and device persistence/export. Local notes and scheduler state are included in session export/reset. Teacher role checks are trusted local API checks, not a security boundary against the browser owner. These additions have their own prospective plans in Dual Order #7 and Group Canvas #7.
 
 Run `python -m unittest test_priorities -v`, `python run_lesson2.py`, and `node --test test_priorities.mjs` from this folder. The added Python and JS checks cover ordering, state, scope/provenance, handover, parity and no-feedback transfer. The original lesson evidence remains unchanged.
+
+
+## צ portfolio lesson and פצ questions
+
+The teacher's revision-1 צ card has three separate functions: questioning, blank-line expansion and paperclip attachment. Its back contains the supplied questioning procedure and Who/What/When/Where/Why/How slots. **Only Who is green by Timothy's explicit instruction, for this tool-use scope.** What remains locked, with no automatic activation on exposure or reference-test success. This is not a new claim of learned interrogative grammar or general Who comprehension.
+
+`tsadi_tool.py` and `public/tsadi.js` provide a new bounded adapter and browser port. The learner copies the board profile to a stable own tool card; equality is checked before the ע receipt is recorded. This is mechanical copying scaffolding. Expansion adds blank lines without replacing the card/profile or previous lines. Paperclips link distinct existing local practice cards and deduplicate reversed endpoints. These are actual state transitions with event records, not new protected-Genesis authority.
+
+The turn-based פצ exercise receives only an unknown requested role and participant context: both role references are initially null. The controller uses a supplied Who template through the presentation's פ egress, then waits. The teacher points to an entity; the reply is attributed as a teacher statement, not independently verified world truth. No hidden correct entity is supplied to the questioning function. Choosing to ask about a speaker/addressee is currently a teacher-selected objective, not an independently invented question goal.
+
+Pending question turns exclude a simultaneous new lesson attempt and block optional Recess, while note capture remains possible. Tool state persists on the device, is included in session export and clears with confirmed classroom reset. Actor labels and read-only UI slots are local API discipline, not a security boundary against the browser owner. No original Algorithm-000 changes, arbitrary code, external model calls, new ץ semantics or automatic vocabulary admission are introduced.
+
+The profile card declares operations; the live implementations are explicitly bound module methods. Extra possible צ portfolios—selection/pointing, bookmarks, grouping/deck assembly, detachable attachments—remain proposals. None transfers identification authority from ר or validation authority from the teacher.
+
+Prospective plans: Dual Order #8 and Group Canvas #8. `python test_tsadi.py` runs nine focused Python checks and writes the synthetic parity fixture. `node --test test_tsadi.mjs` validates browser parity/guards. The isolated publishing workflow retains original/priorities tests and adds phone front/back/copy/slot-lock/question/teacher-answer/persistence checks.
