@@ -20,14 +20,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify Python evidence parity and teaching state machine
+      - name: Verify read-only documentary mapping and source
         run: |
-          node --test experiments/echo-classroom/test.mjs
-          node --test experiments/echo-classroom/test_priorities.mjs
-          node --test experiments/echo-classroom/test_tsadi.mjs
-          node --check experiments/echo-classroom/public/app.js
-          node --check experiments/echo-classroom/public/priority-ui.js
-          node --check experiments/echo-classroom/public/tsadi-ui.js
+          node --test experiments/echo-classroom/test_documentary.mjs
+          node --check experiments/echo-classroom/public/documentary.js
       - name: Deploy isolated synthetic classroom
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -36,8 +32,8 @@ jobs:
         run: npx --yes wrangler@4 deploy --config experiments/echo-classroom/wrangler.toml
       - name: Install browser controller
         run: python -m pip install playwright==1.55.0
-      - name: Check Android-size teacher turns and evidence viewer
-        run: python experiments/echo-classroom/browser_test.py
+      - name: Check phone reading and absence of participation
+        run: python experiments/echo-classroom/browser_documentary.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

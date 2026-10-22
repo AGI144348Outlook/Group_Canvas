@@ -1,3 +1,11 @@
+# Current classroom purpose — read-only documentary
+
+Timothy clarified that the visual classroom is an observation/documentary surface, not the experiment's operator. The default page now reads saved records only. It does not run the learner, grade, execute Recess, or open previous local practice state. Participation is deferred; the former HTML is archived outside public assets at `archive/interactive-index.html`. See [documentary protocol](DOCUMENTARY-PROTOCOL.md).
+
+The historical interactive descriptions and results below are retained as history, not current viewer instructions. Existing archives remain explicitly scripted synthetic experiments. Actual Codex/Echo teaching exchanges have not yet been archived and are not fabricated here.
+
+---
+
 # Echo classroom — first bounded adaptation experiment
 
 Canonical research branch: dual-order-os `experiment/echo-swadesh-fresh-start`. Synthetic teaching sessions are separate from the untouched empty starter profile. Browser artifact mirror: Group_Canvas `experiment/hierarchy-tower`, isolated `experiments/echo-classroom/` Worker.

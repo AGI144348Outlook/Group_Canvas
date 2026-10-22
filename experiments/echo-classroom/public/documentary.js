@@ -1,0 +1,13 @@
+import{buildChapters,sourceText}from'./documentary-model.js';
+const $=id=>document.getElementById(id),el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
+let chapters=[],chapter=0,position=0;
+function render(){const c=chapters[chapter],r=c.events[position];$('chapters').replaceChildren();chapters.forEach((item,i)=>{const b=el('button','chapter',item.title);b.setAttribute('aria-pressed',String(i===chapter));b.onclick=()=>{chapter=i;position=0;render();};$('chapters').append(b);});
+ $('chapter-title').textContent=c.title;$('chapter-subtitle').textContent=c.subtitle;$('scope').textContent=c.scope;$('results').replaceChildren();for(const [name,value]of c.results){const box=el('div','stat');box.append(el('small','',name),el('strong','',value));$('results').append(box);}
+ $('record-number').textContent='RECORD '+String(position+1).padStart(2,'0')+' / '+c.events.length;$('record-actor').textContent=r.actor;$('board').textContent=r.board;$('record-kind').textContent=r.kind;$('student-output').textContent=r.student;$('teacher-output').textContent=r.teacher;$('summary').textContent=r.summary;
+ $('context').textContent=Object.keys(r.context).length?JSON.stringify(r.context,null,2):'No additional participant context in this record.';$('raw').textContent=sourceText(r);$('source').href=r.source;$('report').href='https://github.com/AGI144348Outlook/dual-order-os/blob/experiment/echo-swadesh-fresh-start/research/progression/'+c.report;
+ $('previous').disabled=position===0;$('next').disabled=position===c.events.length-1;$('read-position').textContent=(position+1)+' / '+c.events.length;
+ $('record-list').replaceChildren();c.events.forEach((record,i)=>{const b=el('button','record-link',String(i+1).padStart(2,'0')+' · '+record.kind);b.setAttribute('aria-current',i===position?'true':'false');b.onclick=()=>{position=i;render();};$('record-list').append(b);});
+}
+async function load(){try{const data=await Promise.all(['/evidence.json','/lesson2-evidence.json','/tsadi-evidence.json'].map(async path=>{const r=await fetch(path,{method:'GET'});if(!r.ok)throw Error('Recorded evidence could not be opened');return r.json();}));chapters=buildChapters(...data);render();$('load-status').textContent='Recorded evidence loaded. Reading this page does not run an experiment.';document.body.dataset.ready='true';}catch(e){$('load-status').textContent=e.message;$('documentary').hidden=true;}}
+ $('previous').onclick=()=>{if(position>0){position--;render();}};$('next').onclick=()=>{if(position<chapters[chapter].events.length-1){position++;render();}};
+load();
