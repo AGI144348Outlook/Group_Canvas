@@ -1,0 +1,94 @@
+{
+  "format": "echo-priority-card-profiles/1",
+  "cards": [
+    {
+      "id": "priority:notes",
+      "revision": 1,
+      "kind": "algorithm-profile",
+      "title": "First-priority note facility",
+      "status": "implemented-bounded-adapter",
+      "trigger": "note requested by teacher or permitted adapter",
+      "binding": "priority_cards.PriorityCards.request_note / tick",
+      "limitations": [
+        "four supplied templates",
+        "two captures yield to waiting assignment",
+        "no self-validation"
+      ],
+      "provenance": "Timothy classroom discussion; explicit Codex prototype",
+      "authority": "local trusted controller only; no new Algorithm-000 authority"
+    },
+    {
+      "id": "priority:recess",
+      "revision": 1,
+      "kind": "algorithm-profile",
+      "title": "Last-priority Recess",
+      "status": "implemented-bounded-adapter",
+      "trigger": "enabled; no queued notes/assignments; no pending teacher turn",
+      "binding": "priority_cards.PriorityCards.tick",
+      "limitations": [
+        "step-driven only",
+        "three activities per activation",
+        "teacher handover after each candidate",
+        "no vocabulary promotion"
+      ],
+      "provenance": "Timothy classroom discussion; explicit Codex prototype",
+      "authority": "local trusted controller only; no new Algorithm-000 authority"
+    },
+    {
+      "id": "template:observation",
+      "revision": 1,
+      "kind": "note-template",
+      "title": "observation",
+      "fields": [
+        "body",
+        "source",
+        "evidence",
+        "review"
+      ],
+      "default_review": "unreviewed",
+      "claim_status": "record-not-validated-truth"
+    },
+    {
+      "id": "template:hypothesis",
+      "revision": 1,
+      "kind": "note-template",
+      "title": "hypothesis",
+      "fields": [
+        "body",
+        "source",
+        "evidence",
+        "review"
+      ],
+      "default_review": "unreviewed",
+      "claim_status": "record-not-validated-truth"
+    },
+    {
+      "id": "template:question",
+      "revision": 1,
+      "kind": "note-template",
+      "title": "question",
+      "fields": [
+        "body",
+        "source",
+        "evidence",
+        "review"
+      ],
+      "default_review": "unreviewed",
+      "claim_status": "record-not-validated-truth"
+    },
+    {
+      "id": "template:trial",
+      "revision": 1,
+      "kind": "note-template",
+      "title": "trial",
+      "fields": [
+        "body",
+        "source",
+        "evidence",
+        "review"
+      ],
+      "default_review": "unreviewed",
+      "claim_status": "record-not-validated-truth"
+    }
+  ]
+}

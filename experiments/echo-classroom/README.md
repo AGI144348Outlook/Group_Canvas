@@ -48,3 +48,18 @@ node --test test.mjs
 Use a clean generated `evidence/` directory for `run_lesson.py`; it refuses to overwrite an existing `lesson.sqlite`. The checked-in JSON supplies the browser parity fixture. `browser_test.py` targets the isolated deployed artifact at a 390×844 touch viewport, using the existing GitHub Actions Chromium setup. It is mobile emulation, not a physical-device trial. The existing tower/room/storage deployment is unchanged.
 
 The local Sites publishing helper was not available; publication uses the existing Cloudflare artifact workflow instead. No Sites project was created.
+
+
+## Lesson 2 and first/last-priority prototypes
+
+[Lesson 1 progress review](LESSON-1-REVIEW.md) records what the first lesson did and did not establish. `run_lesson2.py` freezes the saved state and tests 17 new layouts (including 2/4 participants and three 3-person role-position patterns absent from training), then six missing-context checks: 40 questions, zero new training turns. Recorded scores are counter 40/40, UCB 11/40 and cold control 13/40. These remain reference-selection results, not general language or green admission.
+
+`priority_cards.py` and `public/priorities.js` are new adapters. First-priority note templates accept observation/hypothesis/question/trial records; two consecutive captures yield to a waiting assignment. Note requests remain possible during a pending teacher turn, but ordinary work and Recess wait. Automatic encounter notes are made by the classroom adapter, not spontaneously authored by Echo.
+
+Last-priority Recess is opt-in and **step-driven** in this prototype. It runs only behind notes/assignments and outside pending teacher turns, with a three-activity budget per activation, previously visited candidate tracking and a mandatory handover after a candidate is recorded. Disabling stops future steps. Closing the page does not run a background agent. This is not a complete idle-detection/autonomous Rest loop.
+
+The personal dictionary is three teacher-supplied red candidate entries. Lowercased lookup aliases identify known spellings; raw definitions are preserved. Coverage counts green and yellow separately, with green requiring a nonambiguous active sense plus a definition-reading qualification/evidence reference. The classroom supplies **no green qualification** from Lesson 1 reference performance. Recess uses available yellow encounters to select a question target, not to infer/approve a new definition. Accepted note review means retain the record, not certify its contents; rejected records remain in audit state. No self-grading, vocabulary promotion, arbitrary program execution, public authentication or new Algorithm-000 authority is introduced.
+
+The visible controls provide first-priority note requests, an ordinary dictionary-inspection assignment, one controller step, enable/pause, teacher review/handover, Lesson 2 local assessment and device persistence/export. Local notes and scheduler state are included in session export/reset. Teacher role checks are trusted local API checks, not a security boundary against the browser owner. These additions have their own prospective plans in Dual Order #7 and Group Canvas #7.
+
+Run `python -m unittest test_priorities -v`, `python run_lesson2.py`, and `node --test test_priorities.mjs` from this folder. The added Python and JS checks cover ordering, state, scope/provenance, handover, parity and no-feedback transfer. The original lesson evidence remains unchanged.

@@ -23,7 +23,9 @@ jobs:
       - name: Verify Python evidence parity and teaching state machine
         run: |
           node --test experiments/echo-classroom/test.mjs
+          node --test experiments/echo-classroom/test_priorities.mjs
           node --check experiments/echo-classroom/public/app.js
+          node --check experiments/echo-classroom/public/priority-ui.js
       - name: Deploy isolated synthetic classroom
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
