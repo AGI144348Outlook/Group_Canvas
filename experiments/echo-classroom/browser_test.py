@@ -121,7 +121,9 @@ with sync_playwright() as p:
     page.locator('#tool-answer-choices button',has_text='Entity B').tap()
     expect(page.locator('#tsadi-status')).to_contain_text('Teacher reply recorded')
     expect(page.locator('#tool-ask')).to_be_enabled()
+    page.locator('#tool-flip').tap()
     expect(page.get_by_role('button',name='What question slot red',exact=True)).to_be_disabled()
+    page.screenshot(path=str(QA/'tsadi-tool-phone.png'),full_page=True)
     checks.append('teacher answer unblocks session without opening What or promoting vocabulary')
     assert not errors
     checks.append('no browser runtime errors')
