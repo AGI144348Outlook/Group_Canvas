@@ -1,0 +1,35 @@
+name: Private Julian full-conversation recovery
+on:
+  push:
+    branches: [codex/project-julian-recovery]
+    paths: ['tools/julian-recovery/**', '.github/workflows/julian-recovery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: project-julian-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic Julian recovery tests
+        run: python -m unittest discover -s tools/julian-recovery -p 'test_recover.py' -v
+      - name: Recover private Julian conversations and verify derived copies
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node tools/julian-recovery/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-julian-recovery
+          path: julian-result/
+          retention-days: 2
