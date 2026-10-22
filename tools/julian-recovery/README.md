@@ -11,3 +11,5 @@ Direct-address detection is a conservative heuristic, not proof of attribution. 
 Results and provenance are written to a new private cabinet collection and downloaded for SHA-256 verification. A gzip copy is encrypted with the committed public recipient certificate. Only the encrypted copy and aggregate summary enter a two-day Actions artifact. The private recipient key is never committed or uploaded.
 
 Synthetic validation: `python -m unittest discover -s tools/julian-recovery -p 'test_recover.py' -v`. A passing workflow does not establish source completeness, reviewed Julian attribution, or personality continuity. Check actual aggregate coverage and warnings before making claims.
+
+Execution branch: `codex/project-julian-recovery`. Pushes changing this directory start the bounded recovery workflow after the issue plan has been published.
