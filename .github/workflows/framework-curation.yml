@@ -1,0 +1,35 @@
+name: Private R2 framework inventory
+on:
+  push:
+    branches: [curation/r2-framework-inventory]
+    paths: ['tools/framework-curation/**', '.github/workflows/framework-curation.yml']
+permissions:
+  contents: read
+concurrency:
+  group: private-framework-curation
+  cancel-in-progress: false
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic scanner boundary checks
+        run: python -m unittest discover -s tools/framework-curation -p 'test_scan.py' -v
+      - name: Install PDF reader
+        run: pip install pypdf==6.1.1
+      - name: Read accessible R2 objects and encrypt private candidate inventory
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python tools/framework-curation/scan.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: encrypted-framework-inventory
+          path: curation-result/
+          if-no-files-found: warn
+          retention-days: 2
