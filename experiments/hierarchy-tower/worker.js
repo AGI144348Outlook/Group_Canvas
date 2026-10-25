@@ -1,9 +1,11 @@
 import {filingAPI} from './filing-service.js';
+import {r2ReadAPI} from './r2-read-service.js';
 export {FileCabinet} from './filing-service.js';
 import {storageAPI} from './upload-service.js';
 export {TowerUpload} from './upload-service.js';
 export default {
  async fetch(request,env){
+  if(new URL(request.url).pathname==="/api/files/r2-read")return r2ReadAPI(request,env);
   if(new URL(request.url).pathname.startsWith("/api/files/"))return filingAPI(request,env);
   if(new URL(request.url).pathname.startsWith("/api/storage/"))return storageAPI(request,env);
   const response=await env.ASSETS.fetch(request);
