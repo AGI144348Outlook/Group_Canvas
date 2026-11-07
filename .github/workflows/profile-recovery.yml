@@ -25,6 +25,9 @@ jobs:
         env:
           CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
         run: node tools/profile-recovery/run.mjs
+      - name: Emit encrypted report for session retrieval (ciphertext only)
+        run: |
+          echo "CMS-BEGIN"; base64 -w 76 profile-result/private-report.cms; echo "CMS-END"
       - uses: actions/upload-artifact@v4
         with:
           name: encrypted-profile-recovery
