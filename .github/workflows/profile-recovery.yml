@@ -1,0 +1,32 @@
+name: Private profile-assessment conversation search (read only)
+on:
+  push:
+    branches: [experiment/hierarchy-tower]
+    paths: ['tools/profile-recovery/**', '.github/workflows/profile-recovery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: private-profile-recovery
+  cancel-in-progress: false
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Synthetic match tests
+        run: |
+          node tools/profile-recovery/match.test.mjs
+          node --check tools/profile-recovery/run.mjs
+      - name: Search private GPT exports (read only, no derived uploads)
+        env:
+          CREATE_ROOM_KEY: ${{ secrets.CREATE_ROOM_KEY }}
+        run: node tools/profile-recovery/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-profile-recovery
+          path: profile-result/
+          retention-days: 1
