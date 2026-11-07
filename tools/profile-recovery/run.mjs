@@ -8,7 +8,8 @@ import {pipeline} from 'node:stream/promises';
 import {execFileSync} from 'node:child_process';
 import {gzipSync} from 'node:zlib';
 import {conversationRecords} from '../../public/tower/archive-parser.js';
-import {scoreConversation, excerpt} from './match.mjs';
+import {scoreConversation, excerpt, openingPaths, PATTERNS} from './match.mjs';
+import {contentText} from '../../public/tower/archive-parser.js';
 
 const key = process.env.CREATE_ROOM_KEY;
 if (!key) throw Error('Existing storage credential required');
@@ -38,11 +39,15 @@ try {
   const files = await inventory(), sources = files.filter(f => /^conversations(?:[-_ ]\d+)?\.json$/i.test(f.source.name));
   const seenSource = new Set(), bestByConversation = new Map(), pending = [];
   let read = 0, duplicates = 0, occurrences = 0, scored = 0, parseErrors = 0;
-  const shape = {withMapping: 0, withMessagesArray: 0, otherShape: 0, topKeys: {}, visibleTurns: 0, assistantTurns: 0, branchPaths: 0, roles: {}, contentTypes: {}, partTypes: {}};
+  const shape = {withMapping: 0, withMessagesArray: 0, otherShape: 0, topKeys: {}, visibleTurns: 0, assistantTurns: 0, branchPaths: 0, rootsPerConversation: {}, openingHits: {}, anywhereHits: {}, roles: {}, contentTypes: {}, partTypes: {}};
   const tally = (o, k) => { o[k] = (o[k] || 0) + 1; };
   const inspect = c => {
     if (c && typeof c.mapping === 'object' && c.mapping) shape.withMapping++; else if (Array.isArray(c?.messages) || Array.isArray(c?.chat_messages)) shape.withMessagesArray++; else shape.otherShape++;
     for (const k of Object.keys(c || {})) if (/^[a-z_]{1,32}$/.test(k)) tally(shape.topKeys, k);
+    const map = c?.mapping || {}; tally(shape.rootsPerConversation, String(Object.values(map).filter(n => !n.parent || !map[n.parent]).length));
+    const paths = openingPaths(c); shape.branchPaths += paths.length;
+    for (const path of paths) for (const m of path) { shape.visibleTurns++; if (m.role === 'assistant') { shape.assistantTurns++; for (const [g, ps] of Object.entries(PATTERNS)) ps.forEach((re, i) => { if (re.test(m.text)) tally(shape.openingHits, g + i); }); } }
+    for (const n of Object.values(map)) { const m = n?.message; if (m?.author?.role === 'assistant') { const t = contentText(m).text; for (const [g, ps] of Object.entries(PATTERNS)) ps.forEach((re, i) => { if (re.test(t)) tally(shape.anywhereHits, g + i); }); } }
     for (const n of Object.values(c?.mapping || {})) { const m = n?.message; if (!m) continue; tally(shape.roles, String(m.author?.role)); tally(shape.contentTypes, String(m.content?.content_type)); for (const part of m.content?.parts || []) tally(shape.partTypes, typeof part); }
   };
   for (const file of sources) {

@@ -26,6 +26,7 @@ const PROFILE_PROMPT = [
   /\b(?:act|pretend)\s+as\b|\byou\s+are\s+(?:an?|my)\s+\w+/i,
 ];
 
+export const PATTERNS = {USAGE, PROFILE_REPLY, PROFILE_PROMPT};
 const count = (patterns, text) => patterns.reduce((n, p) => n + (p.test(text) ? 1 : 0), 0);
 const roleOf = n => n?.message?.author?.role;
 const textOf = n => contentText(n?.message).text || '';
