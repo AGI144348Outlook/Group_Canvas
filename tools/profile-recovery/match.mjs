@@ -34,12 +34,16 @@ const textOf = n => contentText(n?.message).text || '';
 // Returns visible messages along every root-to-node path up to `depth` turns.
 export function openingPaths(conversation, depth = 8) {
   const mapping = conversation?.mapping || {};
-  const roots = Object.values(mapping).filter(n => !n.parent || !mapping[n.parent]);
+  // Derive children from parent links: some exports omit or mis-key `children`.
+  const kidsOf = new Map();
+  for (const [k, n] of Object.entries(mapping)) { if (n && n.parent && mapping[n.parent]) { if (!kidsOf.has(n.parent)) kidsOf.set(n.parent, []); kidsOf.get(n.parent).push(k); } }
+  const roots = Object.entries(mapping).filter(([, n]) => n && (!n.parent || !mapping[n.parent])).map(([k]) => k);
   const paths = [];
-  const walk = (node, path) => {
+  const walk = (key, path) => {
+    const node = mapping[key];
     const role = roleOf(node), text = textOf(node).trim();
-    const next = (role === 'user' || role === 'assistant') && text ? [...path, {id: node.id, role, text, time: node.message?.create_time ?? null, parent: node.parent ?? null}] : path;
-    const kids = (node.children || []).map(c => mapping[c]).filter(Boolean);
+    const next = (role === 'user' || role === 'assistant') && text ? [...path, {id: node.id ?? key, role, text, time: node.message?.create_time ?? null, parent: node.parent ?? null}] : path;
+    const kids = kidsOf.get(key) || [];
     if (next.length >= depth || !kids.length) { if (next.length) paths.push(next); return; }
     for (const k of kids) walk(k, next);
   };

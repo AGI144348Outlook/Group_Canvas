@@ -37,7 +37,7 @@ async function inventory() {
 await mkdir(directory, {recursive: true, mode: 0o700});
 try {
   const files = await inventory(), sources = files.filter(f => /^conversations(?:[-_ ]\d+)?\.json$/i.test(f.source.name));
-  const seenSource = new Set(), bestByConversation = new Map(), pending = [];
+  const seenSource = new Set(), bestByConversation = new Map(), pending = [], secondary = new Map();
   let read = 0, duplicates = 0, occurrences = 0, scored = 0, parseErrors = 0;
   const shape = {withMapping: 0, withMessagesArray: 0, otherShape: 0, topKeys: {}, visibleTurns: 0, assistantTurns: 0, branchPaths: 0, rootsPerConversation: {}, openingHits: {}, anywhereHits: {}, roles: {}, contentTypes: {}, partTypes: {}};
   const tally = (o, k) => { o[k] = (o[k] || 0) + 1; };
@@ -66,7 +66,14 @@ try {
       for await (const record of conversationRecords(view)) {
         ordinal++;
         const c = record.value; inspect(c); const hit = scoreConversation(c);
-        if (!hit) continue;
+        if (!hit) {
+          const sid = c.conversation_id || c.id;
+          for (const [k, n] of Object.entries(c.mapping || {})) {
+            const m = n?.message; if (m?.author?.role !== 'assistant') continue; const t = contentText(m).text;
+            if (PATTERNS.USAGE.some(re => re.test(t)) && sid && !secondary.has(sid)) secondary.set(sid, {conversationId: sid, title: c.title ?? null, createTime: c.create_time ?? null, link: 'https://chatgpt.com/c/' + sid, nodeId: k, parentId: n.parent ?? null, time: m.create_time ?? null, profileHits: PATTERNS.PROFILE_REPLY.filter(re => re.test(t)).length, excerpt: excerpt(t), provenance: {sourceFileId: file.id, sourceName: file.source.name, sourceSha256: checksum, ordinal: ordinal - 1, startByte: record.start, endByte: record.end}});
+          }
+          continue;
+        }
         scored++;
         const id = c.conversation_id || c.id || 'no-id:' + sha(record.raw).slice(0, 16);
         const entry = {
@@ -85,10 +92,10 @@ try {
     occurrences += ordinal;
   }
   const candidates = [...bestByConversation.values()].sort((a, b) => b.score - a.score).slice(0, 40);
-  const summary = {sourceFilesListed: sources.length, sourceFilesRead: read, exactDuplicateFilesSkipped: duplicates, pendingFilesExcluded: pending.length, sourceParseErrors: parseErrors, conversationOccurrences: occurrences, scoredOccurrences: scored, distinctScoredConversations: bestByConversation.size, candidatesReported: candidates.length, combinedUsageAndProfile: candidates.filter(c => c.usageHits && c.profileHits).length, writesAttempted: 0, shape};
+  const summary = {sourceFilesListed: sources.length, sourceFilesRead: read, exactDuplicateFilesSkipped: duplicates, pendingFilesExcluded: pending.length, sourceParseErrors: parseErrors, conversationOccurrences: occurrences, scoredOccurrences: scored, distinctScoredConversations: bestByConversation.size, candidatesReported: candidates.length, secondaryUsageOnly: [...secondary.keys()].filter(k => !bestByConversation.has(k)).length, combinedUsageAndProfile: candidates.filter(c => c.usageHits && c.profileHits).length, writesAttempted: 0, shape};
   await mkdir('profile-result', {recursive: true});
   await writeFile('profile-result/summary.json', JSON.stringify(summary, null, 2));
-  await writeFile(directory + '/report.json.gz', gzipSync(JSON.stringify({summary, candidates}, null, 1)), {mode: 0o600});
+  await writeFile(directory + '/report.json.gz', gzipSync(JSON.stringify({summary, candidates, secondary: [...secondary.values()].filter(x => !bestByConversation.has(x.conversationId))}, null, 1)), {mode: 0o600});
   execFileSync('openssl', ['cms', '-encrypt', '-binary', '-aes-256-cbc', '-in', directory + '/report.json.gz', '-out', 'profile-result/private-report.cms', '-outform', 'DER', 'tools/profile-recovery/recipient.pem'], {stdio: 'ignore'});
   console.log('Profile recovery finished: ' + JSON.stringify(summary));
 } catch (e) {

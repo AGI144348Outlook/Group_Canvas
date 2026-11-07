@@ -28,4 +28,13 @@ assert.ok(!r || r.score < hit.score, 'incidental usage phrase ranks below profil
 const plain = convo([node('u', null, 'user', 'Hello', ['a']), node('a', 'u', 'assistant', 'Hi! How can I help?')]);
 assert.equal(scoreConversation(plain), null, 'no-signal conversation rejected');
 
-console.log('profile-recovery match tests: 4 assertions passed');
+// 4. Nodes without `children` arrays are still walked through parent links.
+const noKids = convo([
+  {id: 'r', parent: null, message: null},
+  {id: 'u', parent: 'r', message: {author: {role: 'user'}, content: {content_type: 'text', parts: ['Give me a psychological profile of me']}}},
+  {id: 'a', parent: 'u', message: {author: {role: 'assistant'}, content: {content_type: 'text', parts: ['Your strengths: focus. You tend to dig deep. You use ChatGPT about 20 days per month.']}}},
+]);
+assert.equal(openingPaths(noKids).length, 1, 'parent-linked walk');
+assert.ok(scoreConversation(noKids)?.usageHits >= 1, 'parent-linked usage hit');
+
+console.log('profile-recovery match tests: 6 assertions passed');
