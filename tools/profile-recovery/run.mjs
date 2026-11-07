@@ -38,6 +38,13 @@ try {
   const files = await inventory(), sources = files.filter(f => /^conversations(?:[-_ ]\d+)?\.json$/i.test(f.source.name));
   const seenSource = new Set(), bestByConversation = new Map(), pending = [];
   let read = 0, duplicates = 0, occurrences = 0, scored = 0, parseErrors = 0;
+  const shape = {withMapping: 0, withMessagesArray: 0, otherShape: 0, topKeys: {}, visibleTurns: 0, assistantTurns: 0, branchPaths: 0, roles: {}, contentTypes: {}, partTypes: {}};
+  const tally = (o, k) => { o[k] = (o[k] || 0) + 1; };
+  const inspect = c => {
+    if (c && typeof c.mapping === 'object' && c.mapping) shape.withMapping++; else if (Array.isArray(c?.messages) || Array.isArray(c?.chat_messages)) shape.withMessagesArray++; else shape.otherShape++;
+    for (const k of Object.keys(c || {})) if (/^[a-z_]{1,32}$/.test(k)) tally(shape.topKeys, k);
+    for (const n of Object.values(c?.mapping || {})) { const m = n?.message; if (!m) continue; tally(shape.roles, String(m.author?.role)); tally(shape.contentTypes, String(m.content?.content_type)); for (const part of m.content?.parts || []) tally(shape.partTypes, typeof part); }
+  };
   for (const file of sources) {
     const status = await api('/files/' + file.id + '/status');
     if (status.status !== 'complete') { pending.push(status.status); continue; }
@@ -53,7 +60,7 @@ try {
     try {
       for await (const record of conversationRecords(view)) {
         ordinal++;
-        const c = record.value, hit = scoreConversation(c);
+        const c = record.value; inspect(c); const hit = scoreConversation(c);
         if (!hit) continue;
         scored++;
         const id = c.conversation_id || c.id || 'no-id:' + sha(record.raw).slice(0, 16);
@@ -73,7 +80,7 @@ try {
     occurrences += ordinal;
   }
   const candidates = [...bestByConversation.values()].sort((a, b) => b.score - a.score).slice(0, 40);
-  const summary = {sourceFilesListed: sources.length, sourceFilesRead: read, exactDuplicateFilesSkipped: duplicates, pendingFilesExcluded: pending.length, sourceParseErrors: parseErrors, conversationOccurrences: occurrences, scoredOccurrences: scored, distinctScoredConversations: bestByConversation.size, candidatesReported: candidates.length, combinedUsageAndProfile: candidates.filter(c => c.usageHits && c.profileHits).length, writesAttempted: 0};
+  const summary = {sourceFilesListed: sources.length, sourceFilesRead: read, exactDuplicateFilesSkipped: duplicates, pendingFilesExcluded: pending.length, sourceParseErrors: parseErrors, conversationOccurrences: occurrences, scoredOccurrences: scored, distinctScoredConversations: bestByConversation.size, candidatesReported: candidates.length, combinedUsageAndProfile: candidates.filter(c => c.usageHits && c.profileHits).length, writesAttempted: 0, shape};
   await mkdir('profile-result', {recursive: true});
   await writeFile('profile-result/summary.json', JSON.stringify(summary, null, 2));
   await writeFile(directory + '/report.json.gz', gzipSync(JSON.stringify({summary, candidates}, null, 1)), {mode: 0o600});
