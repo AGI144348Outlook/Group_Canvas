@@ -1,15 +1,19 @@
 {
   "schema": "contract000.audit-checkpoint.v1",
   "repository": "AGI144348Outlook/Group_Canvas",
-  "represented_branch": "RESOLVE_FROM_PARENT_BRANCH_FOLDER",
+  "represented_branch": "codex/project-julian-recovery",
   "category": "protocols",
   "phase": "VERIFY_DIRECTORY",
-  "directory_status": "GENERATED_FROM_PINNED_GITHUB_TREES",
+  "directory_status": "PARTIAL_BLOCKED_RECURSIVE_TREE_VERIFICATION",
   "content_status": "NOT_AUDITED",
   "last_completed_file": null,
   "within_file_position": null,
   "findings": [],
-  "blockers": [],
+  "blockers": [
+    "All four current branch names verified by GitHub branch search; full recursive Git trees unavailable through accessible connector; cannot reconcile names-only header to current source paths or blob IDs."
+  ],
   "next_directory": "../../skills/Contract_ReadMe/Contract000_readme.md",
-  "updated": "2026-11-15"
+  "updated": "2026-11-15",
+  "source_commit": "fa06b54930d40a98786f2e9605c03b58c9395eb6",
+  "last_run_id": "automation-turn-11-2026-11-15T04:58:35-06:00 (runtime surrogate; scheduler UUID unavailable)"
 }
