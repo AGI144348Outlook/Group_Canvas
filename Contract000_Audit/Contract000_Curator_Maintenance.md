@@ -24,9 +24,9 @@ The following are literal entry paths relative to Contract000_Audit/. Resolve th
 
 | Branch | Entry directory | Next branch ID |
 |---|---|---|
-| `codex/project-julian-recovery` | [start](codex%2Fproject-julian-recovery/protocols/Contract_ReadMe/Contract000_readme.md) | 1 |
-| `curation/r2-framework-inventory` | [start](curation%2Fr2-framework-inventory/protocols/Contract_ReadMe/Contract000_readme.md) | 2 |
-| `experiment/hierarchy-tower` | [start](experiment%2Fhierarchy-tower/protocols/Contract_ReadMe/Contract000_readme.md) | 3 |
+| `codex/project-julian-recovery` | [start](codex%252Fproject-julian-recovery/protocols/Contract_ReadMe/Contract000_readme.md) | 1 |
+| `curation/r2-framework-inventory` | [start](curation%252Fr2-framework-inventory/protocols/Contract_ReadMe/Contract000_readme.md) | 2 |
+| `experiment/hierarchy-tower` | [start](experiment%252Fhierarchy-tower/protocols/Contract_ReadMe/Contract000_readme.md) | 3 |
 | `main` | [start](main/protocols/Contract_ReadMe/Contract000_readme.md) | 0 |
 
 ## Final repository routing protocol
