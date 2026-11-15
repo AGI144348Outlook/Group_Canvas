@@ -1,0 +1,45 @@
+{
+  "schema": "contract000.branch-map.v1",
+  "repository": "AGI144348Outlook/Group_Canvas",
+  "source_snapshot_date": "2026-11-15",
+  "maintenance_branch": "main",
+  "excluded_root": "Contract000_Audit",
+  "branches": [
+    {
+      "id": 0,
+      "name": "codex/project-julian-recovery",
+      "folder": "codex%2Fproject-julian-recovery",
+      "source_commit": "fa06b54930d40a98786f2e9605c03b58c9395eb6",
+      "source_tree": "fa06b54930d40a98786f2e9605c03b58c9395eb6",
+      "entry": "codex%2Fproject-julian-recovery/protocols/Contract_ReadMe/Contract000_readme.md",
+      "next_branch_id": 1
+    },
+    {
+      "id": 1,
+      "name": "curation/r2-framework-inventory",
+      "folder": "curation%2Fr2-framework-inventory",
+      "source_commit": "e17ee6abd5ec156b9b4558516aacebcd9ba13242",
+      "source_tree": "e17ee6abd5ec156b9b4558516aacebcd9ba13242",
+      "entry": "curation%2Fr2-framework-inventory/protocols/Contract_ReadMe/Contract000_readme.md",
+      "next_branch_id": 2
+    },
+    {
+      "id": 2,
+      "name": "experiment/hierarchy-tower",
+      "folder": "experiment%2Fhierarchy-tower",
+      "source_commit": "1b13f783ac4d4899432c2cd6ee9498f255f5c553",
+      "source_tree": "1b13f783ac4d4899432c2cd6ee9498f255f5c553",
+      "entry": "experiment%2Fhierarchy-tower/protocols/Contract_ReadMe/Contract000_readme.md",
+      "next_branch_id": 3
+    },
+    {
+      "id": 3,
+      "name": "main",
+      "folder": "main",
+      "source_commit": "36d1b1a311c55cdf1ebeec3ef7499945f56186e8",
+      "source_tree": "36d1b1a311c55cdf1ebeec3ef7499945f56186e8",
+      "entry": "main/protocols/Contract_ReadMe/Contract000_readme.md",
+      "next_branch_id": 0
+    }
+  ]
+}
