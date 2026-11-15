@@ -4,8 +4,9 @@
   "branch_index": 0,
   "category_index": 0,
   "next_directory": "codex%2Fproject-julian-recovery/protocols/Contract_ReadMe/Contract000_readme.md",
-  "directory_status": "GENERATED_FROM_PINNED_GITHUB_TREES",
+  "directory_status": "PARTIAL_BLOCKED_RECURSIVE_TREE_VERIFICATION",
   "content_status": "NOT_AUDITED",
-  "last_run_id": null,
-  "updated": "2026-11-15"
+  "last_run_id": "automation-turn-11-2026-11-15T04:58:35-06:00 (runtime surrogate; scheduler UUID unavailable)",
+  "updated": "2026-11-15",
+  "note": "Four current branch names matched pinned registry; full recursive trees not exposed. Category protocols/codex%2Fproject-julian-recovery remains VERIFY_DIRECTORY; 0 source files read, 0 tests, no discoveries. Category checkpoint commit 2166c88b4e01e69166a5d17af407a9f8ebf5fcac."
 }
